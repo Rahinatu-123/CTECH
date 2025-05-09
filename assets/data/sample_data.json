@@ -1,0 +1,102 @@
+[
+  {
+    "date": "2024-01-01",
+    "ai_jobs": 1200,
+    "data_science_jobs": 850,
+    "cybersecurity_jobs": 950,
+    "mobile_dev_jobs": 1100,
+    "iot_jobs": 750,
+    "average_salary": 8500,
+    "market_growth": 12.5
+  },
+  {
+    "date": "2024-01-15",
+    "ai_jobs": 1250,
+    "data_science_jobs": 880,
+    "cybersecurity_jobs": 980,
+    "mobile_dev_jobs": 1150,
+    "iot_jobs": 780,
+    "average_salary": 8600,
+    "market_growth": 12.8
+  },
+  {
+    "date": "2024-02-01",
+    "ai_jobs": 1300,
+    "data_science_jobs": 900,
+    "cybersecurity_jobs": 1000,
+    "mobile_dev_jobs": 1200,
+    "iot_jobs": 800,
+    "average_salary": 8700,
+    "market_growth": 13.0
+  },
+  {
+    "date": "2024-02-15",
+    "ai_jobs": 1350,
+    "data_science_jobs": 920,
+    "cybersecurity_jobs": 1020,
+    "mobile_dev_jobs": 1250,
+    "iot_jobs": 820,
+    "average_salary": 8800,
+    "market_growth": 13.2
+  },
+  {
+    "date": "2024-03-01",
+    "ai_jobs": 1400,
+    "data_science_jobs": 950,
+    "cybersecurity_jobs": 1050,
+    "mobile_dev_jobs": 1300,
+    "iot_jobs": 850,
+    "average_salary": 8900,
+    "market_growth": 13.5
+  },
+  {
+    "date": "2024-03-15",
+    "ai_jobs": 1450,
+    "data_science_jobs": 980,
+    "cybersecurity_jobs": 1080,
+    "mobile_dev_jobs": 1350,
+    "iot_jobs": 880,
+    "average_salary": 9000,
+    "market_growth": 13.8
+  },
+  {
+    "date": "2024-04-01",
+    "ai_jobs": 1500,
+    "data_science_jobs": 1000,
+    "cybersecurity_jobs": 1100,
+    "mobile_dev_jobs": 1400,
+    "iot_jobs": 900,
+    "average_salary": 9100,
+    "market_growth": 14.0
+  },
+  {
+    "date": "2024-04-15",
+    "ai_jobs": 1550,
+    "data_science_jobs": 1020,
+    "cybersecurity_jobs": 1120,
+    "mobile_dev_jobs": 1450,
+    "iot_jobs": 920,
+    "average_salary": 9200,
+    "market_growth": 14.2
+  },
+  {
+    "date": "2024-05-01",
+    "ai_jobs": 1600,
+    "data_science_jobs": 1050,
+    "cybersecurity_jobs": 1150,
+    "mobile_dev_jobs": 1500,
+    "iot_jobs": 950,
+    "average_salary": 9300,
+    "market_growth": 14.5
+  },
+  {
+    "date": "2024-05-15",
+    "ai_jobs": 1650,
+    "data_science_jobs": 1080,
+    "cybersecurity_jobs": 1180,
+    "mobile_dev_jobs": 1550,
+    "iot_jobs": 980,
+    "average_salary": 9400,
+    "market_growth": 14.8
+  }
+] 

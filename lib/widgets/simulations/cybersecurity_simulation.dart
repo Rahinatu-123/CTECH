@@ -1,0 +1,197 @@
+import 'package:flutter/material.dart';
+import 'dart:math';
+import 'base_simulation.dart';
+
+class CybersecuritySimulation extends BaseSimulation {
+  const CybersecuritySimulation({Key? key}) : super(key: key);
+
+  @override
+  State<CybersecuritySimulation> createState() => _CybersecuritySimulationState();
+}
+
+class _CybersecuritySimulationState extends BaseSimulationState<CybersecuritySimulation> {
+  final _passwordController = TextEditingController();
+  String _strength = '';
+  Color _strengthColor = Colors.grey;
+  double _entropy = 0.0;
+  String _crackTime = '';
+  bool _obscurePassword = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _passwordController.addListener(_analyzePassword);
+  }
+
+  @override
+  void dispose() {
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  void _analyzePassword() {
+    final password = _passwordController.text;
+    if (password.isEmpty) {
+      setState(() {
+        _strength = 'Enter a password';
+        _strengthColor = Colors.grey;
+        _entropy = 0.0;
+        _crackTime = '';
+      });
+      return;
+    }
+
+    // Calculate password entropy
+    final charset = _getCharset(password);
+    final length = password.length;
+    _entropy = length * log(charset) / log(2);
+
+    // Determine strength and color
+    if (_entropy < 30) {
+      _strength = 'Very Weak';
+      _strengthColor = Colors.red;
+    } else if (_entropy < 50) {
+      _strength = 'Weak';
+      _strengthColor = Colors.orange;
+    } else if (_entropy < 70) {
+      _strength = 'Moderate';
+      _strengthColor = Colors.yellow;
+    } else if (_entropy < 100) {
+      _strength = 'Strong';
+      _strengthColor = Colors.lightGreen;
+    } else {
+      _strength = 'Very Strong';
+      _strengthColor = Colors.green;
+    }
+
+    // Estimate crack time
+    _crackTime = _estimateCrackTime(_entropy);
+
+    setState(() {});
+  }
+
+  double _getCharset(String password) {
+    double charset = 0;
+    if (password.contains(RegExp(r'[a-z]'))) charset += 26;
+    if (password.contains(RegExp(r'[A-Z]'))) charset += 26;
+    if (password.contains(RegExp(r'[0-9]'))) charset += 10;
+    if (password.contains(RegExp(r'[^a-zA-Z0-9]'))) charset += 33;
+    return charset;
+  }
+
+  String _estimateCrackTime(double entropy) {
+    // Rough estimate based on entropy
+    if (entropy < 30) return 'Instantly';
+    if (entropy < 50) return 'Minutes to hours';
+    if (entropy < 70) return 'Days to weeks';
+    if (entropy < 100) return 'Months to years';
+    return 'Centuries';
+  }
+
+  @override
+  Widget buildSimulationContent() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text(
+            'Password Strength Analyzer',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 32),
+          TextField(
+            controller: _passwordController,
+            decoration: InputDecoration(
+              labelText: 'Enter Password',
+              border: const OutlineInputBorder(),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                  color: Colors.grey,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _obscurePassword = !_obscurePassword;
+                  });
+                },
+              ),
+            ),
+            obscureText: _obscurePassword,
+          ),
+          const SizedBox(height: 24),
+          if (_strength.isNotEmpty) ...[
+            Text(
+              'Strength: $_strength',
+              style: TextStyle(
+                fontSize: 20,
+                color: _strengthColor,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            LinearProgressIndicator(
+              value: _entropy / 100,
+              backgroundColor: Colors.grey[200],
+              valueColor: AlwaysStoppedAnimation<Color>(_strengthColor),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Entropy: ${_entropy.toStringAsFixed(1)} bits',
+              style: const TextStyle(fontSize: 16),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Estimated crack time: $_crackTime',
+              style: const TextStyle(fontSize: 16),
+              textAlign: TextAlign.center,
+            ),
+          ],
+          const SizedBox(height: 32),
+          const Text(
+            'Password Requirements:',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          _buildRequirement('At least 8 characters long', _passwordController.text.length >= 8),
+          _buildRequirement('Contains uppercase letters', _passwordController.text.contains(RegExp(r'[A-Z]'))),
+          _buildRequirement('Contains lowercase letters', _passwordController.text.contains(RegExp(r'[a-z]'))),
+          _buildRequirement('Contains numbers', _passwordController.text.contains(RegExp(r'[0-9]'))),
+          _buildRequirement('Contains special characters', _passwordController.text.contains(RegExp(r'[^a-zA-Z0-9]'))),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRequirement(String text, bool isMet) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        children: [
+          Icon(
+            isMet ? Icons.check_circle : Icons.circle_outlined,
+            color: isMet ? Colors.green : Colors.grey,
+            size: 20,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            text,
+            style: TextStyle(
+              color: isMet ? Colors.green : Colors.grey,
+              fontSize: 16,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+} 
