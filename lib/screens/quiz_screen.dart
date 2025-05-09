@@ -103,7 +103,7 @@ class _QuizScreenState extends State<QuizScreen> {
                 )
               : SafeArea(
                   child: Padding(
-                    padding: const EdgeInsets.all(24.0),
+                    padding: const EdgeInsets.all(16.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -121,22 +121,22 @@ class _QuizScreenState extends State<QuizScreen> {
                                 color: Colors.grey[600],
                               ),
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 16),
                         Text(
                           currentQuestion.question,
                           style: Theme.of(context)
                               .textTheme
-                              .headlineSmall
+                              .titleLarge
                               ?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
                         ),
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 24),
                         Expanded(
                           child: ListView.separated(
                             itemCount: currentQuestion.options.length,
                             separatorBuilder: (context, index) =>
-                                const SizedBox(height: 16),
+                                const SizedBox(height: 12),
                             itemBuilder: (context, index) {
                               final option = currentQuestion.options[index];
                               return CustomButton(
@@ -170,19 +170,19 @@ class QuizResultScreen extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const Icon(
                 Icons.celebration,
-                size: 64,
+                size: 48,
                 color: Colors.amber,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               Text(
                 'Your Results Are Ready!',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                 textAlign: TextAlign.center,
@@ -191,21 +191,21 @@ class QuizResultScreen extends StatelessWidget {
               Text(
                 result.message ??
                     'Based on your responses, here are the tech careers that might interest you:',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Colors.grey[600],
                     ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
               Expanded(
                 child: ListView.builder(
                   itemCount: result.careers.length,
                   itemBuilder: (context, index) {
                     final career = result.careers[index];
                     return Card(
-                      margin: const EdgeInsets.only(bottom: 16),
+                      margin: const EdgeInsets.only(bottom: 12),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       elevation: 2,
                       child: InkWell(
@@ -224,26 +224,26 @@ class QuizResultScreen extends StatelessWidget {
                             ),
                           );
                         },
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(12),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             ClipRRect(
                               borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(16),
+                                top: Radius.circular(12),
                               ),
                               child: Image.network(
                                 'https://source.unsplash.com/random/400x300/?${(career['title'] ?? 'career').replaceAll(' ', '+')}',
-                                height: 200,
+                                height: 160,
                                 width: double.infinity,
                                 fit: BoxFit.cover,
                                 errorBuilder: (context, error, stackTrace) {
                                   return Container(
-                                    height: 200,
+                                    height: 160,
                                     color: Colors.grey[200],
                                     child: Icon(
                                       _getCareerIcon(career['title'] ?? ''),
-                                      size: 64,
+                                      size: 48,
                                       color: Colors.grey[400],
                                     ),
                                   );
@@ -251,25 +251,25 @@ class QuizResultScreen extends StatelessWidget {
                               ),
                             ),
                             Padding(
-                              padding: const EdgeInsets.all(16),
+                              padding: const EdgeInsets.all(12),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     career['title'] ?? 'Unknown Career',
                                     style: const TextStyle(
-                                      fontSize: 20,
+                                      fontSize: 18,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  const SizedBox(height: 8),
+                                  const SizedBox(height: 6),
                                   Text(
                                     career['description'] ?? 'No description available',
                                     style: TextStyle(
                                       fontSize: 14,
                                       color: Colors.grey[600],
                                     ),
-                                    maxLines: 3,
+                                    maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ],
@@ -282,7 +282,7 @@ class QuizResultScreen extends StatelessWidget {
                   },
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               CustomButton(
                 text: 'Take Quiz Again',
                 onPressed: () {

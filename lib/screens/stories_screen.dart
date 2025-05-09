@@ -206,7 +206,7 @@ class _StoriesScreenState extends State<StoriesScreen> {
               itemBuilder: (context, index) {
                 final story = stories[index];
                 return Card(
-                  margin: const EdgeInsets.all(16.0),
+                  margin: const EdgeInsets.all(12.0),
                   child: SingleChildScrollView(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -214,16 +214,16 @@ class _StoriesScreenState extends State<StoriesScreen> {
                         if (story.imagePath.isNotEmpty)
                           Image.network(
                             story.imagePath,
-                            height: 200,
+                            height: 160,
                             width: double.infinity,
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) {
                               return Container(
-                                height: 200,
+                                height: 160,
                                 color: Colors.grey[200],
                                 child: const Icon(
                                   Icons.person,
-                                  size: 64,
+                                  size: 48,
                                   color: Colors.grey,
                                 ),
                               );

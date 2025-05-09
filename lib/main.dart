@@ -81,6 +81,8 @@ class MyApp extends StatelessWidget {
                 return MaterialPageRoute(builder: (_) => const CareerScreen());
               case '/tech-words':
                 return MaterialPageRoute(builder: (_) => const TechWordsScreen());
+              case '/settings':
+                return MaterialPageRoute(builder: (_) => const SettingsScreen());
               case '/career-details':
                 final career = settings.arguments as Career;
                 return MaterialPageRoute(

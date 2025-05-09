@@ -272,8 +272,8 @@ class _HomeScreenState extends State<HomeScreen> {
   // Banner section widget
   Widget _buildWelcomeBanner() {
     return Container(
-      margin: const EdgeInsets.all(spacing16),
-      padding: const EdgeInsets.all(spacing20),
+      margin: const EdgeInsets.all(spacing12),
+      padding: const EdgeInsets.all(spacing16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [primaryColor, primaryColor.withOpacity(0.8)],
@@ -297,7 +297,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: const Icon(
                   Icons.lightbulb_outline,
                   color: Colors.white,
-                  size: 24,
+                  size: 20,
                 ),
               ),
               const SizedBox(width: spacing12),
@@ -305,7 +305,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Text(
                   'Start Your Tech Journey',
                   style: TextStyle(
-                    fontSize: 24.0,
+                    fontSize: 20.0,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                     letterSpacing: 0.5,
@@ -314,12 +314,12 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-          const SizedBox(height: spacing12),
+          const SizedBox(height: spacing8),
           const Text(
             'Explore careers, learn tech terms, and connect with professionals',
-            style: TextStyle(fontSize: 15.0, color: Colors.white, height: 1.4),
+            style: TextStyle(fontSize: 14.0, color: Colors.white, height: 1.4),
           ),
-          const SizedBox(height: spacing20),
+          const SizedBox(height: spacing16),
           ElevatedButton.icon(
             onPressed: _navigateToCareerScreen,
             icon: const Text('Explore Careers'),
@@ -349,7 +349,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // Career card widget
   Widget _buildCareerCard(Career career) {
     return Container(
-      margin: const EdgeInsets.only(bottom: spacing16),
+      margin: const EdgeInsets.only(bottom: spacing12),
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(borderRadius),
@@ -369,17 +369,17 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               child: Image.network(
                 career.imagePath ?? 'https://via.placeholder.com/150',
-                width: 120,
-                height: 120,
+                width: 90,
+                height: 90,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
-                    width: 120,
-                    height: 120,
+                    width: 90,
+                    height: 90,
                     color: Colors.grey[200],
                     child: const Icon(
                       Icons.work_outline,
-                      size: 40,
+                      size: 32,
                       color: Colors.grey,
                     ),
                   );
@@ -464,8 +464,8 @@ class _HomeScreenState extends State<HomeScreen> {
   // Story card widget
   Widget _buildStoryCard(Story story) {
     return Container(
-      width: 280,
-      margin: const EdgeInsets.only(right: spacing16),
+      width: 240,
+      margin: const EdgeInsets.only(right: spacing12),
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(borderRadius),
@@ -487,17 +487,17 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               child: Image.network(
                 story.imagePath,
-                width: 100,
-                height: 180,
+                width: 80,
+                height: 140,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
-                    width: 100,
-                    height: 180,
+                    width: 80,
+                    height: 140,
                     color: Colors.grey[200],
                     child: const Icon(
                       Icons.person_outline,
-                      size: 40,
+                      size: 32,
                       color: Colors.grey,
                     ),
                   );

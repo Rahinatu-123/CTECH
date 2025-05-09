@@ -199,7 +199,7 @@ class _TechWordsScreenState extends State<TechWordsScreen> {
                   itemBuilder: (context, index) {
                     final word = techWords[index];
                     return Card(
-                      margin: const EdgeInsets.all(16.0),
+                      margin: const EdgeInsets.all(12.0),
                       child: SingleChildScrollView(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -208,11 +208,12 @@ class _TechWordsScreenState extends State<TechWordsScreen> {
                               leading: CircleAvatar(
                                 backgroundColor: Theme.of(context).primaryColor,
                                 foregroundColor: Colors.white,
+                                radius: 20,
                                 child: Text(word.word[0].toUpperCase()),
                               ),
                               title: Text(
                                 word.word,
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                               ),
                               subtitle: Text(word.category.isEmpty ? 'General' : word.category),
                             ),
