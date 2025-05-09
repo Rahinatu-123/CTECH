@@ -103,7 +103,7 @@ class _QuizScreenState extends State<QuizScreen> {
                 )
               : SafeArea(
                   child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.all(12.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -114,35 +114,42 @@ class _QuizScreenState extends State<QuizScreen> {
                               .primary
                               .withOpacity(0.1),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 6),
                         Text(
                           'Question ${_currentQuestionIndex + 1}/${_questions.length}',
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: Colors.grey[600],
+                                fontSize: 12,
                               ),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
                         Text(
                           currentQuestion.question,
                           style: Theme.of(context)
                               .textTheme
-                              .titleLarge
+                              .titleMedium
                               ?.copyWith(
                                 fontWeight: FontWeight.bold,
+                                fontSize: 16,
                               ),
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 16),
                         Expanded(
-                          child: ListView.separated(
+                          child: GridView.builder(
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              childAspectRatio: 2.5,
+                              crossAxisSpacing: 8,
+                              mainAxisSpacing: 8,
+                            ),
                             itemCount: currentQuestion.options.length,
-                            separatorBuilder: (context, index) =>
-                                const SizedBox(height: 12),
                             itemBuilder: (context, index) {
                               final option = currentQuestion.options[index];
                               return CustomButton(
                                 text: option.text,
                                 isOutlined: true,
                                 onPressed: () => _selectAnswer(option.text),
+                                textColor: Theme.of(context).colorScheme.primary,
                               );
                             },
                           ),
@@ -176,27 +183,29 @@ class QuizResultScreen extends StatelessWidget {
             children: [
               const Icon(
                 Icons.celebration,
-                size: 48,
+                size: 40,
                 color: Colors.amber,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               Text(
                 'Your Results Are Ready!',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
+                      fontSize: 18,
                     ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
               Text(
                 result.message ??
                     'Based on your responses, here are the tech careers that might interest you:',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Colors.grey[600],
+                      fontSize: 13,
                     ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               Expanded(
                 child: ListView.builder(
                   itemCount: result.careers.length,

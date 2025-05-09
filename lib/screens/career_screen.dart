@@ -78,11 +78,11 @@ class _CareerScreenState extends State<CareerScreen> {
                               return null;
                             },
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 12),
                           CustomTextField(
                             controller: _descriptionController,
                             labelText: 'Description',
-                            maxLines: 3,
+                            maxLines: 2,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'Please enter a description';
@@ -90,7 +90,7 @@ class _CareerScreenState extends State<CareerScreen> {
                               return null;
                             },
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 12),
                           CustomTextField(
                             controller: _skillsController,
                             labelText: 'Skills (comma-separated)',
@@ -101,7 +101,7 @@ class _CareerScreenState extends State<CareerScreen> {
                               return null;
                             },
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 12),
                           CustomTextField(
                             controller: _educationController,
                             labelText: 'Education',
@@ -112,7 +112,7 @@ class _CareerScreenState extends State<CareerScreen> {
                               return null;
                             },
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 12),
                           CustomTextField(
                             controller: _salaryRangeController,
                             labelText: 'Salary Range',
@@ -123,7 +123,7 @@ class _CareerScreenState extends State<CareerScreen> {
                               return null;
                             },
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 12),
                           CustomTextField(
                             controller: _jobOutlookController,
                             labelText: 'Job Outlook',
@@ -158,16 +158,16 @@ class _CareerScreenState extends State<CareerScreen> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(12.0),
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
                 hintText: 'Search careers...',
-                prefixIcon: const Icon(Icons.search),
+                prefixIcon: const Icon(Icons.search, size: 20),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0),
+                  borderRadius: BorderRadius.circular(8.0),
                 ),
-                contentPadding: const EdgeInsets.symmetric(vertical: 12.0),
+                contentPadding: const EdgeInsets.symmetric(vertical: 8.0),
               ),
               onChanged: (value) {
                 setState(() {
@@ -213,15 +213,15 @@ class _CareerScreenState extends State<CareerScreen> {
                 }
 
                 return ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
                   itemCount: filteredCareers.length,
                   itemBuilder: (context, index) {
                     final career = filteredCareers[index];
                     return Container(
-                      margin: const EdgeInsets.only(bottom: 8),
+                      margin: const EdgeInsets.only(bottom: 6),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(6),
                         border: Border.all(
                           color: Colors.grey.withOpacity(0.2),
                           width: 1,
@@ -235,27 +235,27 @@ class _CareerScreenState extends State<CareerScreen> {
                             arguments: career,
                           );
                         },
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(6),
                         child: Padding(
-                          padding: const EdgeInsets.all(8),
+                          padding: const EdgeInsets.all(6),
                           child: Row(
                             children: [
                               Container(
-                                width: 40,
-                                height: 40,
+                                width: 32,
+                                height: 32,
                                 decoration: BoxDecoration(
                                   color: Theme.of(context).primaryColor.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(6),
+                                  borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Center(
                                   child: Icon(
                                     _getCareerIcon(career.title),
-                                    size: 20,
+                                    size: 16,
                                     color: Theme.of(context).primaryColor,
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 12),
+                              const SizedBox(width: 8),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -264,17 +264,17 @@ class _CareerScreenState extends State<CareerScreen> {
                                     Text(
                                       career.title,
                                       style: const TextStyle(
-                                        fontSize: 14,
+                                        fontSize: 13,
                                         fontWeight: FontWeight.w600,
                                       ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
-                                    const SizedBox(height: 2),
+                                    const SizedBox(height: 1),
                                     Text(
                                       career.description,
                                       style: TextStyle(
-                                        fontSize: 12,
+                                        fontSize: 11,
                                         color: Colors.grey[600],
                                       ),
                                       maxLines: 1,
@@ -285,7 +285,7 @@ class _CareerScreenState extends State<CareerScreen> {
                               ),
                               Icon(
                                 Icons.chevron_right,
-                                size: 20,
+                                size: 16,
                                 color: Colors.grey[400],
                               ),
                             ],
@@ -330,11 +330,18 @@ class _CareerScreenState extends State<CareerScreen> {
     });
 
     try {
+      // Split the skills string by comma and trim whitespace
+      final skillsList = _skillsController.text
+          .split(',')
+          .map((skill) => skill.trim())
+          .where((skill) => skill.isNotEmpty)
+          .toList();
+
       final career = Career(
         id: 0, // This will be set by the server
         title: _titleController.text,
         description: _descriptionController.text,
-        skills: _skillsController.text.split(',').map((skill) => skill.trim()).toList(),
+        skills: skillsList, // Now properly passing a List<String>
         education: _educationController.text,
         salaryRange: _salaryRangeController.text,
         jobOutlook: _jobOutlookController.text,

@@ -22,6 +22,8 @@ class _TechWordsScreenState extends State<TechWordsScreen> {
   late Future<List<TechWord>> _futureTechWords;
   final bool _isLoading = true;
   bool _isSubmitting = false;
+  final _searchController = TextEditingController();
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -35,6 +37,7 @@ class _TechWordsScreenState extends State<TechWordsScreen> {
     _meaningController.dispose();
     _exampleController.dispose();
     _categoryController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -151,136 +154,164 @@ class _TechWordsScreenState extends State<TechWordsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tech Words'),
-        backgroundColor: Theme.of(context).primaryColor,
+        title: const Text(
+          'Tech Words',
+          style: TextStyle(fontSize: 18),
+        ),
       ),
-      body: FutureBuilder<List<TechWord>>(
-        future: _futureTechWords,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          final techWords = snapshot.data ?? [];
-
-          if (techWords.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    'No tech words available',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Tap the + button to add new tech words',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                  const SizedBox(height: 16),
-                  if (snapshot.hasError) ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        _futureTechWords = TechWordsService().fetchTechWords();
-                      });
-                    },
-                    child: const Text('Retry'),
-                  ),
-                ],
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search tech words...',
+                prefixIcon: const Icon(Icons.search, size: 20),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 8),
               ),
-            );
-          }
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value.toLowerCase();
+                });
+              },
+            ),
+          ),
+          Expanded(
+            child: FutureBuilder<List<TechWord>>(
+              future: _futureTechWords,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-          return Column(
-            children: [
-              Expanded(
-                child: PageView.builder(
-                  itemCount: techWords.length,
-                  itemBuilder: (context, index) {
-                    final word = techWords[index];
-                    return Card(
-                      margin: const EdgeInsets.all(12.0),
-                      child: SingleChildScrollView(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ListTile(
-                              leading: CircleAvatar(
-                                backgroundColor: Theme.of(context).primaryColor,
-                                foregroundColor: Colors.white,
-                                radius: 20,
-                                child: Text(word.word[0].toUpperCase()),
+                final techWords = snapshot.data ?? [];
+                final filteredWords = techWords.where((word) => word.word.toLowerCase().contains(_searchQuery)).toList();
+
+                if (filteredWords.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          'No tech words available',
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Tap the + button to add new tech words',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                        const SizedBox(height: 16),
+                        if (snapshot.hasError) ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              _futureTechWords = TechWordsService().fetchTechWords();
+                            });
+                          },
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                return Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    itemCount: filteredWords.length,
+                    itemBuilder: (context, index) {
+                      final word = filteredWords[index];
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: ExpansionTile(
+                          leading: CircleAvatar(
+                            radius: 16,
+                            backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+                            child: Text(
+                              word.word[0].toUpperCase(),
+                              style: TextStyle(
+                                color: Theme.of(context).primaryColor,
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
                               ),
-                              title: Text(
-                                word.word,
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                              ),
-                              subtitle: Text(word.category.isEmpty ? 'General' : word.category),
                             ),
+                          ),
+                          title: Text(
+                            word.word,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          subtitle: Text(
+                            word.category.isEmpty ? 'General' : word.category,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          children: [
                             Padding(
-                              padding: const EdgeInsets.all(16.0),
+                              padding: const EdgeInsets.all(12),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     'Meaning:',
                                     style: TextStyle(
+                                      fontSize: 13,
                                       fontWeight: FontWeight.bold,
                                       color: Theme.of(context).primaryColor,
-                                      fontSize: 16,
                                     ),
                                   ),
-                                  const SizedBox(height: 8),
+                                  const SizedBox(height: 4),
                                   Text(
                                     word.meaning,
-                                    style: const TextStyle(fontSize: 16, height: 1.5),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Text(
-                                    'Example:',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Theme.of(context).primaryColor,
-                                      fontSize: 16,
+                                    style: const TextStyle(
+                                      fontSize: 13,
                                     ),
                                   ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    word.example,
-                                    style: const TextStyle(fontSize: 16, height: 1.5, fontStyle: FontStyle.italic),
-                                  ),
+                                  if (word.example != null) ...[
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Example:',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold,
+                                        color: Theme.of(context).primaryColor,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      word.example!,
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                    ),
+                                  ],
                                 ],
                               ),
                             ),
                           ],
                         ),
-                      ),
-                    );
-                  },
-                  scrollDirection: Axis.vertical,
-                  pageSnapping: true,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  techWords.length,
-                  (index) => Container(
-                    width: 8.0,
-                    height: 8.0,
-                    margin: const EdgeInsets.symmetric(horizontal: 4.0),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Theme.of(context).primaryColor.withOpacity(0.5),
-                    ),
+                      );
+                    },
                   ),
-                ),
-              ),
-              const SizedBox(height: 16),
-            ],
-          );
-        },
+                );
+              },
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddWordDialog,
