@@ -92,9 +92,9 @@ class _StoriesScreenState extends State<StoriesScreen> {
                 CustomTextField(
                   controller: _fullStoryController,
                   labelText: 'Full Story',
-                  maxLines: 4,
+                  maxLines: 5,
                   validator: (value) =>
-                      value!.isEmpty ? 'Please enter the story' : null,
+                      value!.isEmpty ? 'Please enter the full story' : null,
                 ),
               ],
             ),
@@ -105,78 +105,105 @@ class _StoriesScreenState extends State<StoriesScreen> {
             onPressed: () => Navigator.pop(context),
             child: const Text('Cancel'),
           ),
-          CustomButton(
-            text: 'Save',
-            isLoading: _isSubmitting,
-            onPressed: _submitStory,
+          ElevatedButton(
+            onPressed: _isSubmitting
+                ? null
+                : () async {
+                    if (_formKey.currentState!.validate()) {
+                      setState(() => _isSubmitting = true);
+                      try {
+                        final story = Story(
+                          id: 0,
+                          name: _nameController.text,
+                          role: _roleController.text,
+                          company: _companyController.text,
+                          imagePath: _imagePathController.text,
+                          shortQuote: _shortQuoteController.text,
+                          fullStory: _fullStoryController.text,
+                        );
+                        await _storiesService.addStory(story);
+                        if (mounted) {
+                          Navigator.pop(context);
+                          setState(() {
+                            _futureStories = _storiesService.fetchStories();
+                          });
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Story added successfully'),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Error adding story: $e'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      } finally {
+                        if (mounted) {
+                          setState(() => _isSubmitting = false);
+                        }
+                      }
+                    }
+                  },
+            child: _isSubmitting
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('Add Story'),
           ),
         ],
       ),
     );
   }
 
-  Future<void> _submitStory() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() => _isSubmitting = true);
-    await Future.delayed(const Duration(milliseconds: 500));
-
-    final story = Story(
-      id: DateTime.now().millisecondsSinceEpoch,
-      name: _nameController.text,
-      role: _roleController.text,
-      company: _companyController.text,
-      imagePath: _imagePathController.text,
-      shortQuote: _shortQuoteController.text,
-      fullStory: _fullStoryController.text,
-    );
-
-    setState(() {
-      _futureStories = Future.value([story]);
-      _isSubmitting = false;
-    });
-
-    if (!mounted) return;
-    Navigator.pop(context);
-
-    _nameController.clear();
-    _roleController.clear();
-    _companyController.clear();
-    _imagePathController.clear();
-    _shortQuoteController.clear();
-    _fullStoryController.clear();
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Story shared successfully!')),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 600;
+    
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Success Stories',
-          style: TextStyle(fontSize: 18),
+          style: TextStyle(
+            fontSize: isSmallScreen ? screenSize.width * 0.05 : screenSize.width * 0.035,
+            fontWeight: FontWeight.bold,
+          ),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: _showAddStoryDialog,
+          ),
+        ],
       ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(screenSize.width * 0.04),
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
                 hintText: 'Search stories...',
-                prefixIcon: const Icon(Icons.search, size: 20),
+                prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
-                contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: screenSize.width * 0.04,
+                  vertical: screenSize.height * 0.015,
+                ),
               ),
               onChanged: (value) {
                 setState(() {
-                  _searchQuery = value.toLowerCase();
+                  _searchQuery = value;
                 });
               },
             ),
@@ -185,130 +212,140 @@ class _StoriesScreenState extends State<StoriesScreen> {
             child: FutureBuilder<List<Story>>(
               future: _futureStories,
               builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
                 if (snapshot.hasError) {
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.error_outline, size: 40, color: Colors.red),
-                        const SizedBox(height: 12),
                         Text(
-                          'Error loading stories: ${snapshot.error}',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 14),
+                          'Error: ${snapshot.error}',
+                          style: TextStyle(
+                            fontSize: isSmallScreen ? screenSize.width * 0.035 : screenSize.width * 0.025,
+                          ),
                         ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: screenSize.height * 0.02),
                         ElevatedButton(
                           onPressed: () {
                             setState(() {
                               _futureStories = _storiesService.fetchStories();
                             });
                           },
-                          child: const Text('Retry'),
+                          child: Text(
+                            'Retry',
+                            style: TextStyle(
+                              fontSize: isSmallScreen ? screenSize.width * 0.035 : screenSize.width * 0.025,
+                            ),
+                          ),
                         ),
                       ],
                     ),
                   );
                 }
 
-                if (!snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'No stories available',
+                      style: TextStyle(
+                        fontSize: isSmallScreen ? screenSize.width * 0.035 : screenSize.width * 0.025,
+                      ),
+                    ),
+                  );
                 }
 
                 final stories = snapshot.data!;
                 final filteredStories = stories.where((story) {
-                  return story.name.toLowerCase().contains(_searchQuery) ||
-                      story.role.toLowerCase().contains(_searchQuery) ||
-                      story.company.toLowerCase().contains(_searchQuery);
+                  final searchLower = _searchQuery.toLowerCase();
+                  return story.name.toLowerCase().contains(searchLower) ||
+                      story.role.toLowerCase().contains(searchLower) ||
+                      story.company.toLowerCase().contains(searchLower);
                 }).toList();
 
                 if (filteredStories.isEmpty) {
-                  return const Center(
+                  return Center(
                     child: Text(
-                      'No stories found',
-                      style: TextStyle(fontSize: 14),
+                      'No matching stories found',
+                      style: TextStyle(
+                        fontSize: isSmallScreen ? screenSize.width * 0.035 : screenSize.width * 0.025,
+                      ),
                     ),
                   );
                 }
 
                 return ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: EdgeInsets.all(screenSize.width * 0.02),
                   itemCount: filteredStories.length,
                   itemBuilder: (context, index) {
                     final story = filteredStories[index];
                     return Card(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                      margin: EdgeInsets.symmetric(
+                        vertical: screenSize.height * 0.01,
+                        horizontal: screenSize.width * 0.02,
                       ),
                       child: InkWell(
-                        onTap: () {
-                          Navigator.pushNamed(
-                            context,
-                            '/story-details',
-                            arguments: story,
-                          );
-                        },
-                        borderRadius: BorderRadius.circular(8),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ClipRRect(
-                              borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(8),
+                        onTap: () => Navigator.pushNamed(
+                          context,
+                          '/story-details',
+                          arguments: story,
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.all(screenSize.width * 0.02),
+                          child: Row(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(screenSize.width * 0.02),
+                                child: Image.network(
+                                  story.imagePath ?? 'https://via.placeholder.com/40',
+                                  width: screenSize.width * 0.1,
+                                  height: screenSize.width * 0.1,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      width: screenSize.width * 0.1,
+                                      height: screenSize.width * 0.1,
+                                      color: Colors.grey[200],
+                                      child: Icon(
+                                        Icons.person,
+                                        size: screenSize.width * 0.05,
+                                        color: Colors.grey[400],
+                                      ),
+                                    );
+                                  },
+                                ),
                               ),
-                              child: Image.network(
-                                story.imagePath,
-                                height: 140,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Container(
-                                    height: 140,
-                                    color: Colors.grey[200],
-                                    child: Icon(
-                                      Icons.person,
-                                      size: 40,
-                                      color: Colors.grey[400],
+                              SizedBox(width: screenSize.width * 0.02),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      story.name,
+                                      style: TextStyle(
+                                        fontSize: isSmallScreen ? screenSize.width * 0.04 : screenSize.width * 0.03,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                  );
-                                },
+                                    SizedBox(height: screenSize.height * 0.005),
+                                    Text(
+                                      '${story.role} at ${story.company}',
+                                      style: TextStyle(
+                                        fontSize: isSmallScreen ? screenSize.width * 0.035 : screenSize.width * 0.025,
+                                        color: Colors.grey[600],
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    story.name,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    '${story.role} at ${story.company}',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    story.shortQuote,
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      fontStyle: FontStyle.italic,
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     );
@@ -318,10 +355,6 @@ class _StoriesScreenState extends State<StoriesScreen> {
             ),
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showAddStoryDialog,
-        child: const Icon(Icons.add),
       ),
     );
   }

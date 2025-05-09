@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../services/auth.dart';
+import '../widgets/custom_button.dart';
 
 class VerifyOtpScreen extends StatefulWidget {
   final String email;
@@ -59,112 +61,127 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 600;
+    
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Verify OTP'),
+        title: Text(
+          'Verify OTP',
+          style: TextStyle(
+            fontSize: isSmallScreen ? screenSize.width * 0.05 : screenSize.width * 0.035,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: 24),
-                Text(
-                  'Enter OTP',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'We\'ve sent a 4-digit code to ${widget.email}',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Colors.grey[600],
-                      ),
-                ),
-                const SizedBox(height: 32),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: List.generate(
-                    4,
-                    (index) => SizedBox(
-                      width: 60,
-                      child: TextFormField(
-                        controller: _otpControllers[index],
-                        focusNode: _focusNodes[index],
-                        decoration: InputDecoration(
-                          counterText: '',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: EdgeInsets.all(screenSize.width * 0.04),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Title
+                  Text(
+                    'Enter Verification Code',
+                    style: TextStyle(
+                      fontSize: isSmallScreen ? screenSize.width * 0.07 : screenSize.width * 0.05,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: screenSize.height * 0.01),
+                  Text(
+                    'We\'ve sent a verification code to your email',
+                    style: TextStyle(
+                      fontSize: isSmallScreen ? screenSize.width * 0.035 : screenSize.width * 0.025,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  SizedBox(height: screenSize.height * 0.04),
+
+                  // OTP Fields
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: List.generate(
+                      6,
+                      (index) => SizedBox(
+                        width: screenSize.width * 0.12,
+                        child: TextFormField(
+                          controller: _otpControllers[index],
+                          keyboardType: TextInputType.number,
+                          textAlign: TextAlign.center,
+                          maxLength: 1,
+                          style: TextStyle(
+                            fontSize: isSmallScreen ? screenSize.width * 0.05 : screenSize.width * 0.035,
+                            fontWeight: FontWeight.bold,
                           ),
+                          decoration: InputDecoration(
+                            counterText: '',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(screenSize.width * 0.02),
+                            ),
+                            contentPadding: EdgeInsets.symmetric(
+                              vertical: screenSize.height * 0.015,
+                            ),
+                          ),
+                          onChanged: (value) {
+                            if (value.length == 1 && index < 5) {
+                              FocusScope.of(context).nextFocus();
+                            }
+                          },
                         ),
-                        textAlign: TextAlign.center,
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          LengthLimitingTextInputFormatter(1),
-                          FilteringTextInputFormatter.digitsOnly,
-                        ],
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return '';
-                          }
-                          return null;
-                        },
-                        onChanged: (value) {
-                          if (value.isNotEmpty && index < 3) {
-                            _focusNodes[index + 1].requestFocus();
-                          }
-                        },
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 32),
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _verifyOtp,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                  SizedBox(height: screenSize.height * 0.04),
+
+                  // Submit Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: CustomButton(
+                      text: 'Verify',
+                      isLoading: _isLoading,
+                      onPressed: _verifyOtp,
                     ),
                   ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : const Text(
-                          'Verify',
-                          style: TextStyle(fontSize: 16),
+                  SizedBox(height: screenSize.height * 0.02),
+
+                  // Resend Code
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Didn\'t receive the code? ',
+                        style: TextStyle(
+                          fontSize: isSmallScreen ? screenSize.width * 0.035 : screenSize.width * 0.025,
+                          color: Colors.grey[600],
                         ),
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("Didn't receive the code?"),
-                    TextButton(
-                      onPressed: _isLoading
-                          ? null
-                          : () {
-                              // TODO: Implement resend OTP
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('OTP resent successfully'),
-                                ),
-                              );
-                            },
-                      child: const Text('Resend'),
-                    ),
-                  ],
-                ),
-              ],
+                      ),
+                      TextButton(
+                        onPressed: _isLoading
+                            ? null
+                            : () {
+                                // TODO: Implement resend OTP
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('OTP resent successfully'),
+                                  ),
+                                );
+                              },
+                        child: Text(
+                          'Resend',
+                          style: TextStyle(
+                            fontSize: isSmallScreen ? screenSize.width * 0.035 : screenSize.width * 0.025,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),

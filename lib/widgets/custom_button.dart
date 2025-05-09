@@ -4,70 +4,54 @@ class CustomButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
   final bool isLoading;
-  final bool isOutlined;
   final Color? backgroundColor;
   final Color? textColor;
+  final double? width;
+  final double? height;
+  final double? fontSize;
 
   const CustomButton({
-    super.key,
+    Key? key,
     required this.text,
     required this.onPressed,
     this.isLoading = false,
-    this.isOutlined = false,
     this.backgroundColor,
     this.textColor,
-  });
+    this.width,
+    this.height,
+    this.fontSize,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    if (isOutlined) {
-      return OutlinedButton(
+    return SizedBox(
+      width: width ?? double.infinity,
+      height: height ?? 50,
+      child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
-        style: OutlinedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 16),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: backgroundColor ?? Theme.of(context).primaryColor,
+          foregroundColor: textColor ?? Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          side: BorderSide(color: theme.colorScheme.primary),
-        ),
-        child: _buildChild(theme),
-      );
-    }
-
-    return ElevatedButton(
-      onPressed: isLoading ? null : onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: backgroundColor ?? theme.colorScheme.primary,
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
-      child: _buildChild(theme),
-    );
-  }
-
-  Widget _buildChild(ThemeData theme) {
-    if (isLoading) {
-      return SizedBox(
-        height: 20,
-        width: 20,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          valueColor: AlwaysStoppedAnimation<Color>(
-            isOutlined ? theme.colorScheme.primary : Colors.white,
+            borderRadius: BorderRadius.circular(8),
           ),
         ),
-      );
-    }
-
-    return Text(
-      text,
-      style: TextStyle(
-        fontSize: 16,
-        color: textColor ?? (isOutlined ? theme.colorScheme.primary : Colors.white),
+        child: isLoading
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+            : Text(
+                text,
+                style: TextStyle(
+                  fontSize: fontSize ?? 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
       ),
     );
   }

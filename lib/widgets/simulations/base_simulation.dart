@@ -23,39 +23,68 @@ abstract class BaseSimulationState<T extends BaseSimulation> extends State<T> {
     });
   }
 
+  String getInstructions();
   Widget buildSimulationContent();
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
-    }
-
-    if (_error != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              _error!,
-              style: const TextStyle(color: Colors.red),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                setError(null);
-                setState(() {});
-              },
-              child: const Text('Retry'),
-            ),
-          ],
+    // Get screen size for responsive layout
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 600;
+    
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Simulation',
+          style: TextStyle(
+            fontSize: isSmallScreen ? screenSize.width * 0.03 : screenSize.width * 0.02,
+          ),
         ),
-      );
-    }
-
-    return buildSimulationContent();
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.all(screenSize.width * 0.02),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Card(
+                margin: EdgeInsets.symmetric(vertical: screenSize.height * 0.01),
+                child: Padding(
+                  padding: EdgeInsets.all(screenSize.width * 0.02),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Instructions',
+                        style: TextStyle(
+                          fontSize: isSmallScreen ? screenSize.width * 0.035 : screenSize.width * 0.025,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: screenSize.height * 0.01),
+                      Text(
+                        getInstructions(),
+                        style: TextStyle(
+                          fontSize: isSmallScreen ? screenSize.width * 0.03 : screenSize.width * 0.02,
+                          color: Colors.grey[800],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: screenSize.height * 0.01),
+              Container(
+                constraints: BoxConstraints(
+                  maxHeight: screenSize.height * 0.6,
+                  minHeight: screenSize.height * 0.3,
+                ),
+                child: buildSimulationContent(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 } 

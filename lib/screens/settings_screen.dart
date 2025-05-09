@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
+import '../services/auth.dart';
 // import '../services/notification_service.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -13,7 +14,7 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   // final NotificationService _notificationService = NotificationService();
   // bool _notificationsEnabled = true;
-  bool _isLoading = true;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -88,107 +89,277 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 600;
+    
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text(
+          'Settings',
+          style: TextStyle(
+            fontSize: isSmallScreen ? screenSize.width * 0.05 : screenSize.width * 0.035,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                _buildSection(
-                  'Appearance',
-                  [
-                    SwitchListTile(
-                      title: const Text('Dark Mode'),
-                      subtitle: Text(
-                        themeProvider.isDarkMode ? 'Dark theme enabled' : 'Light theme enabled',
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                      value: themeProvider.isDarkMode,
-                      onChanged: (value) {
-                        themeProvider.toggleTheme();
-                      },
-                    ),
-                  ],
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Account Settings
+            Padding(
+              padding: EdgeInsets.all(screenSize.width * 0.04),
+              child: Text(
+                'Account Settings',
+                style: TextStyle(
+                  fontSize: isSmallScreen ? screenSize.width * 0.04 : screenSize.width * 0.03,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).primaryColor,
                 ),
-                const Divider(),
-                // Notification section commented out
-                // _buildSection(
-                //   'Notifications',
-                //   [
-                //     SwitchListTile(
-                //       title: const Text('Push Notifications'),
-                //       subtitle: Text(
-                //         _notificationsEnabled
-                //             ? 'You will receive notifications'
-                //             : 'Notifications are disabled',
-                //         style: const TextStyle(fontSize: 14),
-                //       ),
-                //       value: _notificationsEnabled,
-                //       onChanged: _toggleNotifications,
-                //     ),
-                //     if (_notificationsEnabled) ...[
-                //       ListTile(
-                //         title: const Text('Test Quiz Reminder'),
-                //         subtitle: const Text('Send a test quiz reminder notification'),
-                //         trailing: const Icon(Icons.notifications),
-                //         onTap: () => _notificationService.showQuizReminder(),
-                //       ),
-                //       ListTile(
-                //         title: const Text('Test Career Update'),
-                //         subtitle: const Text('Send a test career update notification'),
-                //         trailing: const Icon(Icons.work),
-                //         onTap: () => _notificationService.showCareerUpdate(),
-                //       ),
-                //       ListTile(
-                //         title: const Text('Test Tech Word'),
-                //         subtitle: const Text('Send a test tech word notification'),
-                //         trailing: const Icon(Icons.book),
-                //         onTap: () => _notificationService.showTechWordOfTheDay(),
-                //       ),
-                //     ],
-                //   ],
-                // ),
-                // const Divider(),
-                _buildSection(
-                  'Account',
-                  [
-                    ListTile(
-                      title: const Text('Delete Account'),
-                      subtitle: const Text(
-                        'Permanently delete your account and all data',
-                        style: TextStyle(fontSize: 14),
-                      ),
-                      trailing: const Icon(Icons.warning, color: Colors.red),
-                      onTap: () => _showDeleteAccountDialog(context),
-                    ),
-                  ],
+              ),
+            ),
+            _buildSettingsCard(
+              context,
+              [
+                _buildSettingsItem(
+                  context,
+                  'Edit Profile',
+                  Icons.person,
+                  () => Navigator.pushNamed(context, '/profile'),
+                  screenSize,
+                  isSmallScreen,
+                ),
+                _buildDivider(screenSize),
+                _buildSettingsItem(
+                  context,
+                  'Change Password',
+                  Icons.lock,
+                  () => Navigator.pushNamed(context, '/reset-password'),
+                  screenSize,
+                  isSmallScreen,
+                ),
+                _buildDivider(screenSize),
+                _buildSettingsItem(
+                  context,
+                  'Notification Preferences',
+                  Icons.notifications,
+                  () {
+                    // Navigate to notification settings
+                  },
+                  screenSize,
+                  isSmallScreen,
                 ),
               ],
+              screenSize,
             ),
+
+            // App Settings
+            Padding(
+              padding: EdgeInsets.all(screenSize.width * 0.04),
+              child: Text(
+                'App Settings',
+                style: TextStyle(
+                  fontSize: isSmallScreen ? screenSize.width * 0.04 : screenSize.width * 0.03,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).primaryColor,
+                ),
+              ),
+            ),
+            _buildSettingsCard(
+              context,
+              [
+                _buildSettingsItem(
+                  context,
+                  'Language',
+                  Icons.language,
+                  () {
+                    // Show language selection dialog
+                  },
+                  screenSize,
+                  isSmallScreen,
+                  trailing: Text(
+                    'English',
+                    style: TextStyle(
+                      fontSize: isSmallScreen ? screenSize.width * 0.025 : screenSize.width * 0.015,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ),
+                _buildDivider(screenSize),
+                _buildSettingsItem(
+                  context,
+                  'Theme',
+                  Icons.palette,
+                  () {
+                    // Show theme selection dialog
+                  },
+                  screenSize,
+                  isSmallScreen,
+                  trailing: Text(
+                    'System Default',
+                    style: TextStyle(
+                      fontSize: isSmallScreen ? screenSize.width * 0.025 : screenSize.width * 0.015,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ),
+                _buildDivider(screenSize),
+                _buildSettingsItem(
+                  context,
+                  'Data Usage',
+                  Icons.data_usage,
+                  () {
+                    // Navigate to data usage settings
+                  },
+                  screenSize,
+                  isSmallScreen,
+                ),
+              ],
+              screenSize,
+            ),
+
+            // Support
+            Padding(
+              padding: EdgeInsets.all(screenSize.width * 0.04),
+              child: Text(
+                'Support',
+                style: TextStyle(
+                  fontSize: isSmallScreen ? screenSize.width * 0.04 : screenSize.width * 0.03,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).primaryColor,
+                ),
+              ),
+            ),
+            _buildSettingsCard(
+              context,
+              [
+                _buildSettingsItem(
+                  context,
+                  'Help Center',
+                  Icons.help,
+                  () {
+                    // Navigate to help center
+                  },
+                  screenSize,
+                  isSmallScreen,
+                ),
+                _buildDivider(screenSize),
+                _buildSettingsItem(
+                  context,
+                  'Contact Support',
+                  Icons.support,
+                  () {
+                    // Navigate to contact support
+                  },
+                  screenSize,
+                  isSmallScreen,
+                ),
+                _buildDivider(screenSize),
+                _buildSettingsItem(
+                  context,
+                  'About',
+                  Icons.info,
+                  () {
+                    // Show about dialog
+                  },
+                  screenSize,
+                  isSmallScreen,
+                ),
+              ],
+              screenSize,
+            ),
+
+            // Logout Button
+            Padding(
+              padding: EdgeInsets.all(screenSize.width * 0.04),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    try {
+                      final authService = context.read<AuthService>();
+                      await authService.signOut();
+                      if (!mounted) return;
+                      Navigator.pushReplacementNamed(context, '/login');
+                    } catch (e) {
+                      if (!mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(e.toString())),
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(
+                      vertical: screenSize.height * 0.015,
+                    ),
+                    backgroundColor: Colors.red,
+                  ),
+                  child: Text(
+                    'Log Out',
+                    style: TextStyle(
+                      fontSize: isSmallScreen ? screenSize.width * 0.035 : screenSize.width * 0.025,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
-  Widget _buildSection(String title, List<Widget> children) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Text(
-            title,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.primary,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+  Widget _buildSettingsCard(
+    BuildContext context,
+    List<Widget> children,
+    Size screenSize,
+  ) {
+    return Card(
+      margin: EdgeInsets.symmetric(
+        horizontal: screenSize.width * 0.04,
+        vertical: screenSize.height * 0.01,
+      ),
+      child: Column(
+        children: children,
+      ),
+    );
+  }
+
+  Widget _buildSettingsItem(
+    BuildContext context,
+    String title,
+    IconData icon,
+    VoidCallback onTap,
+    Size screenSize,
+    bool isSmallScreen, {
+    Widget? trailing,
+  }) {
+    return ListTile(
+      leading: Icon(
+        icon,
+        size: isSmallScreen ? screenSize.width * 0.05 : screenSize.width * 0.035,
+        color: Theme.of(context).primaryColor,
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontSize: isSmallScreen ? screenSize.width * 0.035 : screenSize.width * 0.025,
         ),
-        ...children,
-      ],
+      ),
+      trailing: trailing ?? Icon(
+        Icons.chevron_right,
+        size: isSmallScreen ? screenSize.width * 0.05 : screenSize.width * 0.035,
+        color: Colors.grey[400],
+      ),
+      onTap: onTap,
+    );
+  }
+
+  Widget _buildDivider(Size screenSize) {
+    return Divider(
+      height: screenSize.height * 0.001,
+      thickness: screenSize.height * 0.001,
     );
   }
 }

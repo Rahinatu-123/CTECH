@@ -7,187 +7,161 @@ class CareerDetailsScreen extends StatelessWidget {
 
   const CareerDetailsScreen({super.key, required this.career});
 
+  String _getSimulationType(String title) {
+    // Use the career's simulationType property
+    return career.simulationType ?? '';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 200,
-            pinned: true,
-            flexibleSpace: FlexibleSpaceBar(
-              title: Text(career.title),
-              background: Container(
-                color: Theme.of(context).primaryColor.withOpacity(0.1),
-                child: Icon(
-                  _getCareerIcon(career.title),
-                  size: 64,
-                  color: Theme.of(context).primaryColor,
+      appBar: AppBar(
+        title: Text(career.title),
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Hero Image
+            Container(
+              height: 200,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: NetworkImage(career.imagePath ?? 'https://via.placeholder.com/800x400'),
+                  fit: BoxFit.cover,
                 ),
               ),
             ),
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
+            
+            Padding(
+              padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildSection(
-                    context,
-                    'Description',
-                    career.description,
-                    Icons.description,
-                  ),
-                  const SizedBox(height: 24),
-                  _buildSection(
-                    context,
-                    'Required Skills',
-                    null,
-                    Icons.psychology,
-                    chips: career.skills.map((skill) => skill.trim()).toList(),
-                  ),
-                  const SizedBox(height: 24),
-                  _buildSection(
-                    context,
-                    'Education',
-                    career.education,
-                    Icons.school,
-                  ),
-                  const SizedBox(height: 24),
-                  _buildSection(
-                    context,
-                    'Salary Range',
-                    career.salaryRange,
-                    Icons.attach_money,
-                  ),
-                  const SizedBox(height: 24),
-                  _buildSection(
-                    context,
-                    'Job Outlook',
-                    career.jobOutlook,
-                    Icons.trending_up,
-                  ),
-                  const SizedBox(height: 32),
-                  if (career.tools != null && career.tools!.isNotEmpty)
-                    _buildSection(
-                      context,
-                      'Tools & Technologies',
-                      null,
-                      Icons.build,
-                      chips: career.tools!,
+                  // Title and Description
+                  Text(
+                    career.title,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
                     ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    career.description,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Skills Section
+                  const Text(
+                    'Required Skills',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: career.skills.map((skill) {
+                      return Chip(
+                        label: Text(skill),
+                        backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+                        labelStyle: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Education Section
+                  const Text(
+                    'Education Requirements',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    career.education,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Salary Range Section
+                  const Text(
+                    'Salary Range',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    career.salaryRange,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Job Outlook Section
+                  const Text(
+                    'Job Outlook',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    career.jobOutlook,
+                    style: const TextStyle(fontSize: 16),
+                  ),
                   const SizedBox(height: 32),
-                  if (career.simulationType != null) ...[
-                    Center(
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder:
-                                  (context) => SimulationScreen(
-                                    simulationType: career.simulationType!,
-                                    careerTitle: career.title,
-                                  ),
+
+                  // Try Career Simulation Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SimulationScreen(
+                              simulationType: _getSimulationType(career.title),
+                              careerTitle: career.title,
                             ),
-                          );
-                        },
-                        icon: const Icon(Icons.play_circle_outline),
-                        label: const Text('Try Simulation'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 32,
-                            vertical: 16,
                           ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 32),
-                  ],
-                  Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.lightbulb_outline,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Career Insights',
-                                style: Theme.of(context).textTheme.titleLarge
-                                    ?.copyWith(fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'This career path offers opportunities for growth and development in the tech industry. Consider exploring related roles and continuous learning to advance your career.',
-                            style: Theme.of(context).textTheme.bodyLarge,
-                          ),
-                        ],
+                      child: const Text(
+                        'Try Career Simulation',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
                 ],
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSection(
-    BuildContext context,
-    String title,
-    String? content,
-    IconData icon, {
-    List<String>? chips,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(icon, color: Theme.of(context).colorScheme.primary),
-            const SizedBox(width: 8),
-            Text(
-              title,
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-            ),
           ],
         ),
-        const SizedBox(height: 12),
-        if (content != null)
-          Text(content, style: Theme.of(context).textTheme.bodyLarge),
-        if (chips != null) ...[
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children:
-                chips.map((item) {
-                  return Chip(
-                    label: Text(item),
-                    backgroundColor: Theme.of(
-                      context,
-                    ).colorScheme.primary.withOpacity(0.1),
-                  );
-                }).toList(),
-          ),
-        ],
-      ],
+      ),
     );
   }
 

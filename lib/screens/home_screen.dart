@@ -5,6 +5,9 @@ import '../services/career_service.dart';
 import '../services/stories_service.dart';
 import './stories_screen.dart';
 import './tech_words_screen.dart';
+import './career_screen.dart';
+import './profile_screen.dart';
+import './quiz_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -49,6 +52,12 @@ class _HomeScreenState extends State<HomeScreen> {
           _error = e.toString();
           _isLoading = false;
         });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error loading careers: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }
@@ -69,6 +78,12 @@ class _HomeScreenState extends State<HomeScreen> {
           _storiesError = e.toString();
           _isLoadingStories = false;
         });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error loading stories: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }
@@ -94,400 +109,108 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildHomeTab() {
     return ListView(
+      padding: const EdgeInsets.all(8),
       children: [
         // Welcome Banner
-        Container(
-          margin: const EdgeInsets.all(12),
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [darkBlue, darkBlue.withOpacity(0.7)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(16.0),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(
-                    Icons.waving_hand,
-                    size: 20,
-                    color: Colors.amber,
+        Card(
+          margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.waving_hand,
+                      size: 16,
+                      color: Colors.amber,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Welcome back!',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Explore tech careers and find your path',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.grey[600],
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Welcome back!',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                ),
+                const SizedBox(height: 8),
+                InkWell(
+                  onTap: () {
+                    setState(() {
+                      _currentIndex = 1;
+                    });
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Explore Careers',
+                          style: TextStyle(
+                            color: darkBlue,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(Icons.arrow_forward, color: darkBlue, size: 12),
+                      ],
                     ),
                   ),
-                ],
-              ),
-              const SizedBox(height: 8),
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        // Featured Careers Section
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
               Text(
-                'Explore tech careers and find your path',
+                'Featured Careers',
                 style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 20.0),
-              InkWell(
-                onTap: () {
+              TextButton(
+                onPressed: () {
                   setState(() {
-                    _currentIndex = 1; // Navigate to Careers tab
+                    _currentIndex = 1;
                   });
                 },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(30.0),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'Explore Careers',
-                        style: TextStyle(
-                          color: darkBlue,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(width: 8.0),
-                      Icon(Icons.arrow_forward, color: darkBlue, size: 16),
-                    ],
+                child: Text(
+                  'View All',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Theme.of(context).primaryColor,
                   ),
                 ),
               ),
             ],
           ),
         ),
-
-        // Featured Careers Section - Just a few careers
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Featured Careers',
-                    style: TextStyle(
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      setState(() {
-                        _currentIndex = 1; // Navigate to Careers tab
-                      });
-                    },
-                    child: const Text('View All'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12.0),
-              if (_isLoading)
-                const Center(child: CircularProgressIndicator())
-              else if (_error.isNotEmpty)
-                Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('Error: $_error'),
-                      const SizedBox(height: 8.0),
-                      ElevatedButton(
-                        onPressed: _loadCareers,
-                        child: const Text('Retry'),
-                      ),
-                    ],
-                  ),
-                )
-              else if (_careers.isEmpty)
-                const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Text('No careers found.'),
-                  ),
-                )
-              else
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: _careers.length > 3 ? 3 : _careers.length,
-                  itemBuilder: (context, index) {
-                    final career = _careers[index];
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.pushNamed(
-                            context,
-                            '/career-details',
-                            arguments: career,
-                          );
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 80,
-                                height: 80,
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context).primaryColor.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Center(
-                                  child: Icon(
-                                    _getCareerIcon(career.title),
-                                    size: 28,
-                                    color: Theme.of(context).primaryColor,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      career.title,
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      career.description,
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey[600],
-                                      ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-            ],
-          ),
-        ),
-        
-        const SizedBox(height: 24.0),
-        
-        // Success Stories Section
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Success Stories',
-                    style: TextStyle(
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      setState(() {
-                        _currentIndex = 2; // Navigate to Stories tab
-                      });
-                    },
-                    child: const Text('View All'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12.0),
-              if (_isLoadingStories)
-                const Center(child: CircularProgressIndicator())
-              else if (_storiesError.isNotEmpty)
-                Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('Error: $_storiesError'),
-                      const SizedBox(height: 8.0),
-                      ElevatedButton(
-                        onPressed: _loadStories,
-                        child: const Text('Retry'),
-                      ),
-                    ],
-                  ),
-                )
-              else if (_recentStories.isEmpty)
-                const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Text('No stories available yet.'),
-                  ),
-                )
-              else
-                SizedBox(
-                  height: 180,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: _recentStories.length > 3 ? 3 : _recentStories.length,
-                    itemBuilder: (context, index) {
-                      final story = _recentStories[index];
-                      return Container(
-                        width: 200,
-                        margin: const EdgeInsets.only(right: 8),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: InkWell(
-                          onTap: () {
-                            setState(() {
-                              _currentIndex = 2; // Navigate to Stories tab
-                            });
-                          },
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              ClipRRect(
-                                borderRadius: const BorderRadius.vertical(
-                                  top: Radius.circular(8),
-                                ),
-                                child: Image.network(
-                                  story.imagePath,
-                                  height: 120,
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Container(
-                                      height: 120,
-                                      color: Colors.grey[200],
-                                      child: Icon(
-                                        Icons.image,
-                                        size: 28,
-                                        color: Colors.grey[400],
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      story.name,
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    Text(
-                                      '${story.role} at ${story.company}',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey[600],
-                                      ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-            ],
-          ),
-        ),
-        
-        const SizedBox(height: 32.0),
-      ],
-    );
-  }
-
-  Widget _buildCareersTab() {
-    return ListView(
-      children: [
-        // Search Bar
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: TextField(
-            decoration: InputDecoration(
-              hintText: 'Search careers...',
-              prefixIcon: const Icon(Icons.search),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              contentPadding: const EdgeInsets.symmetric(vertical: 12.0),
-            ),
-            onChanged: (value) {
-              // Search functionality would go here
-            },
-          ),
-        ),
-
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.0),
-          child: Text(
-            'All Careers',
-            style: TextStyle(
-              fontSize: 20.0,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        const SizedBox(height: 8.0),
-        
         if (_isLoading)
           const Center(child: CircularProgressIndicator())
         else if (_error.isNotEmpty)
@@ -495,99 +218,85 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Error: $_error'),
-                const SizedBox(height: 8.0),
+                Text(
+                  'Error: $_error',
+                  style: const TextStyle(fontSize: 10),
+                ),
+                const SizedBox(height: 4),
                 ElevatedButton(
                   onPressed: _loadCareers,
-                  child: const Text('Retry'),
+                  child: const Text(
+                    'Retry',
+                    style: TextStyle(fontSize: 10),
+                  ),
                 ),
               ],
             ),
           )
         else if (_careers.isEmpty)
-          const Center(
+          Center(
             child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text('No careers found.'),
+              padding: const EdgeInsets.all(8),
+              child: Text(
+                'No careers found.',
+                style: TextStyle(fontSize: 10),
+              ),
             ),
           )
         else
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 16.0,
-                mainAxisSpacing: 16.0,
-                childAspectRatio: 0.75,
-              ),
-              itemCount: _careers.length,
-              itemBuilder: (context, index) {
-                final career = _careers[index];
-                return Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: _careers.length > 3 ? 3 : _careers.length,
+            itemBuilder: (context, index) {
+              final career = _careers[index];
+              return Card(
+                margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
+                child: InkWell(
+                  onTap: () => Navigator.pushNamed(
+                    context,
+                    '/career-details',
+                    arguments: career,
                   ),
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.pushNamed(
-                        context,
-                        '/career-details',
-                        arguments: career,
-                      );
-                    },
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Padding(
+                    padding: const EdgeInsets.all(6),
+                    child: Row(
                       children: [
-                        ClipRRect(
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(12),
-                            topRight: Radius.circular(12),
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(6),
                           ),
-                          child: Image.asset(
-                            'assets/images/placeholder.jpg',
-                            height: 120,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                height: 120,
-                                color: Colors.grey[200],
-                                child: const Icon(Icons.work, size: 40, color: Colors.grey),
-                              );
-                            },
+                          child: Center(
+                            child: Icon(
+                              _getCareerIcon(career.title),
+                              size: 16,
+                              color: Theme.of(context).primaryColor,
+                            ),
                           ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.all(12.0),
+                        const SizedBox(width: 8),
+                        Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 career.title,
                                 style: const TextStyle(
+                                  fontSize: 11,
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 16,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              const SizedBox(height: 4),
+                              const SizedBox(height: 2),
                               Text(
                                 career.description,
                                 style: TextStyle(
+                                  fontSize: 9,
                                   color: Colors.grey[600],
-                                  fontSize: 12,
                                 ),
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
@@ -598,9 +307,148 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                   ),
-                );
-              },
+                ),
+              );
+            },
+          ),
+
+        const SizedBox(height: 16),
+
+        // Success Stories Section
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Success Stories',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    _currentIndex = 2;
+                  });
+                },
+                child: Text(
+                  'View All',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (_isLoadingStories)
+          const Center(child: CircularProgressIndicator())
+        else if (_storiesError.isNotEmpty)
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Error: $_storiesError',
+                  style: const TextStyle(fontSize: 10),
+                ),
+                const SizedBox(height: 4),
+                ElevatedButton(
+                  onPressed: _loadStories,
+                  child: const Text(
+                    'Retry',
+                    style: TextStyle(fontSize: 10),
+                  ),
+                ),
+              ],
             ),
+          )
+        else if (_recentStories.isEmpty)
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Text(
+                'No stories available yet.',
+                style: TextStyle(fontSize: 10),
+              ),
+            ),
+          )
+        else
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: _recentStories.length > 3 ? 3 : _recentStories.length,
+            itemBuilder: (context, index) {
+              final story = _recentStories[index];
+              return Card(
+                margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
+                child: InkWell(
+                  onTap: () => Navigator.pushNamed(
+                    context,
+                    '/story-details',
+                    arguments: story,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(6),
+                    child: Row(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(6),
+                          child: Image.network(
+                            story.imagePath ?? 'https://via.placeholder.com/40',
+                            width: 40,
+                            height: 40,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                width: 40,
+                                height: 40,
+                                color: Colors.grey[200],
+                                child: Icon(
+                                  Icons.person,
+                                  size: 16,
+                                  color: Colors.grey[400],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                story.name,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                '${story.role} at ${story.company}',
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  color: Colors.grey[600],
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
       ],
     );
@@ -610,30 +458,28 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'CTECH',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: darkBlue,
-        elevation: 0,
+        title: const Text('CTECH'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.quiz),
+            icon: const Icon(Icons.notifications),
             onPressed: () {
-              Navigator.pushNamed(context, '/quiz');
+              // TODO: Implement notifications
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Notifications coming soon!'),
+                ),
+              );
             },
           ),
           IconButton(
-            icon: const Icon(Icons.person),
+            icon: const Icon(Icons.person_outline),
             onPressed: () => Navigator.pushNamed(context, '/profile'),
             tooltip: 'Profile',
           ),
           IconButton(
-            icon: const Icon(Icons.settings, size: 20),
+            icon: const Icon(Icons.settings_outlined),
             onPressed: () => Navigator.pushNamed(context, '/settings'),
+            tooltip: 'Settings',
           ),
         ],
       ),
@@ -641,7 +487,7 @@ class _HomeScreenState extends State<HomeScreen> {
         index: _currentIndex,
         children: [
           _buildHomeTab(),
-          _buildCareersTab(),
+          const CareerScreen(),
           const TechWordsScreen(),
           const StoriesScreen(),
         ],
@@ -658,19 +504,23 @@ class _HomeScreenState extends State<HomeScreen> {
         elevation: 8,
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+            icon: Icon(Icons.home_outlined),
+            activeIcon: Icon(Icons.home),
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.work),
+            icon: Icon(Icons.work_outline),
+            activeIcon: Icon(Icons.work),
             label: 'Careers',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.book),
+            icon: Icon(Icons.book_outlined),
+            activeIcon: Icon(Icons.book),
             label: 'Tech Words',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.article),
+            icon: Icon(Icons.article_outlined),
+            activeIcon: Icon(Icons.article),
             label: 'Stories',
           ),
         ],

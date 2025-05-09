@@ -99,6 +99,11 @@ class _AIEngineerSimulationState extends BaseSimulationState<AIEngineerSimulatio
   }
 
   @override
+  String getInstructions() {
+    return 'Train a simple machine learning model by adjusting parameters and observing the results. Learn about data preprocessing, model training, and evaluation in AI development.';
+  }
+
+  @override
   Widget buildSimulationContent() {
     return Padding(
       padding: const EdgeInsets.all(16.0),

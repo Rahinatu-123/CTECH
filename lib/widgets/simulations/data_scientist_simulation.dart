@@ -17,6 +17,11 @@ class _DataScientistSimulationState extends BaseSimulationState<DataScientistSim
   List<String> _columns = [];
   final bool _isAnalyzing = false;
 
+  @override
+  String getInstructions() {
+    return 'Analyze and visualize data using various statistical methods. Learn about data cleaning, analysis techniques, and creating meaningful visualizations.';
+  }
+
   Future<void> _pickAndAnalyzeFile() async {
     setLoading(true);
     try {
@@ -108,19 +113,44 @@ class _DataScientistSimulationState extends BaseSimulationState<DataScientistSim
 
   @override
   Widget buildSimulationContent() {
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 600;
+    
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(screenSize.width * 0.01),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          Text(
+            'Data Analysis Simulator',
+            style: TextStyle(
+              fontSize: isSmallScreen ? screenSize.width * 0.035 : screenSize.width * 0.025,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: screenSize.height * 0.01),
           ElevatedButton(
             onPressed: _pickAndAnalyzeFile,
-            child: const Text('Select Data File (CSV/JSON)'),
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(
+                horizontal: screenSize.width * 0.02,
+                vertical: screenSize.height * 0.01,
+              ),
+            ),
+            child: Text(
+              'Select Data File (CSV/JSON)',
+              style: TextStyle(
+                fontSize: isSmallScreen ? screenSize.width * 0.025 : screenSize.width * 0.015,
+              ),
+            ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: screenSize.height * 0.01),
           if (_columns.isNotEmpty) ...[
             DropdownButton<String>(
               value: _selectedColumn,
+              isExpanded: true,
+              style: TextStyle(fontSize: isSmallScreen ? screenSize.width * 0.025 : screenSize.width * 0.015),
               items: _columns.map((column) {
                 return DropdownMenuItem(
                   value: column,
@@ -135,19 +165,53 @@ class _DataScientistSimulationState extends BaseSimulationState<DataScientistSim
                 }
               },
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: screenSize.height * 0.01),
             Expanded(
               child: LineChart(
                 LineChartData(
                   gridData: const FlGridData(show: true),
-                  titlesData: const FlTitlesData(show: true),
+                  titlesData: FlTitlesData(
+                    show: true,
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        getTitlesWidget: (value, meta) {
+                          return Text(
+                            value.toInt().toString(),
+                            style: TextStyle(
+                              fontSize: isSmallScreen ? screenSize.width * 0.02 : screenSize.width * 0.015,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        getTitlesWidget: (value, meta) {
+                          return Text(
+                            value.toStringAsFixed(1),
+                            style: TextStyle(
+                              fontSize: isSmallScreen ? screenSize.width * 0.02 : screenSize.width * 0.015,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                  ),
                   borderData: FlBorderData(show: true),
                   lineBarsData: [
                     LineChartBarData(
                       spots: _generateDataPoints(),
                       isCurved: true,
                       color: Colors.blue,
-                      barWidth: 3,
+                      barWidth: isSmallScreen ? 1.5 : 2,
                       dotData: const FlDotData(show: true),
                     ),
                   ],

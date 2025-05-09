@@ -101,136 +101,174 @@ class _BlockchainSimulationState extends BaseSimulationState<BlockchainSimulatio
   }
 
   @override
+  String getInstructions() {
+    return 'Create and interact with a simple blockchain. Learn about blocks, transactions, and the principles of decentralized systems.';
+  }
+
+  @override
   Widget buildSimulationContent() {
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 600;
+    
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(screenSize.width * 0.01),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
-            'Blockchain Smart Contract Simulator',
+          Text(
+            'Blockchain Simulator',
             style: TextStyle(
-              fontSize: 24,
+              fontSize: isSmallScreen ? screenSize.width * 0.035 : screenSize.width * 0.025,
               fontWeight: FontWeight.bold,
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 24),
-          // Balance Card
+          SizedBox(height: screenSize.height * 0.01),
           Card(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: EdgeInsets.all(screenSize.width * 0.01),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Your Balance',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
                   Text(
-                    '${_balance.toStringAsFixed(2)} ETH',
-                    style: const TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-          // Transaction Form
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Text(
-                    'Send ETH',
+                    'New Transaction',
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: isSmallScreen ? screenSize.width * 0.03 : screenSize.width * 0.02,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: _recipientController,
-                    decoration: const InputDecoration(
-                      labelText: 'Recipient Address',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: screenSize.height * 0.005),
                   TextField(
                     controller: _amountController,
-                    decoration: const InputDecoration(
-                      labelText: 'Amount (ETH)',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: 'Amount',
+                      labelStyle: TextStyle(fontSize: isSmallScreen ? screenSize.width * 0.025 : screenSize.width * 0.015),
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: screenSize.width * 0.02,
+                        vertical: screenSize.height * 0.01,
+                      ),
                     ),
                     keyboardType: TextInputType.number,
+                    style: TextStyle(fontSize: isSmallScreen ? screenSize.width * 0.025 : screenSize.width * 0.015),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: screenSize.height * 0.005),
+                  TextField(
+                    controller: _recipientController,
+                    decoration: InputDecoration(
+                      labelText: 'Recipient',
+                      labelStyle: TextStyle(fontSize: isSmallScreen ? screenSize.width * 0.025 : screenSize.width * 0.015),
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: screenSize.width * 0.02,
+                        vertical: screenSize.height * 0.01,
+                      ),
+                    ),
+                    style: TextStyle(fontSize: isSmallScreen ? screenSize.width * 0.025 : screenSize.width * 0.015),
+                  ),
+                  SizedBox(height: screenSize.height * 0.005),
                   ElevatedButton(
                     onPressed: _isProcessing ? null : _processTransaction,
-                    child: Text(_isProcessing ? 'Processing...' : 'Send'),
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: screenSize.width * 0.02,
+                        vertical: screenSize.height * 0.01,
+                      ),
+                    ),
+                    child: Text(
+                      _isProcessing ? 'Processing...' : 'Send Transaction',
+                      style: TextStyle(
+                        fontSize: isSmallScreen ? screenSize.width * 0.025 : screenSize.width * 0.015,
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
           ),
-          const SizedBox(height: 24),
-          // Transaction History
-          const Text(
-            'Transaction History',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
+          SizedBox(height: screenSize.height * 0.01),
           Expanded(
-            child: ListView.builder(
-              itemCount: _transactions.length,
-              itemBuilder: (context, index) {
-                final tx = _transactions[index];
-                return Card(
-                  child: ListTile(
-                    leading: Icon(
-                      tx['type'] == 'deploy' ? Icons.code : Icons.send,
-                      color: tx['status'] == 'success' ? Colors.green : Colors.red,
+            child: Card(
+              child: Padding(
+                padding: EdgeInsets.all(screenSize.width * 0.01),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Transaction History',
+                      style: TextStyle(
+                        fontSize: isSmallScreen ? screenSize.width * 0.03 : screenSize.width * 0.02,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    title: Text(
-                      tx['type'] == 'deploy'
-                          ? 'Contract Deployed'
-                          : '${tx['from']} → ${tx['to']}',
+                    SizedBox(height: screenSize.height * 0.005),
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: _transactions.length,
+                        itemBuilder: (context, index) {
+                          final tx = _transactions[index];
+                          return Card(
+                            margin: EdgeInsets.only(bottom: screenSize.height * 0.005),
+                            child: Padding(
+                              padding: EdgeInsets.all(screenSize.width * 0.01),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        tx['type'] == 'transfer'
+                                            ? Icons.send
+                                            : Icons.code,
+                                        size: isSmallScreen ? screenSize.width * 0.04 : screenSize.width * 0.03,
+                                        color: tx['status'] == 'success'
+                                            ? Colors.green
+                                            : Colors.red,
+                                      ),
+                                      SizedBox(width: screenSize.width * 0.01),
+                                      Expanded(
+                                        child: Text(
+                                          '${tx['from']} → ${tx['to']}',
+                                          style: TextStyle(
+                                            fontSize: isSmallScreen ? screenSize.width * 0.025 : screenSize.width * 0.015,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                      Text(
+                                        tx['amount'] > 0
+                                            ? '${tx['amount']} ETH'
+                                            : '',
+                                        style: TextStyle(
+                                          fontSize: isSmallScreen ? screenSize.width * 0.025 : screenSize.width * 0.015,
+                                          color: Colors.blue,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: screenSize.height * 0.002),
+                                  Text(
+                                    'Hash: ${tx['hash']}',
+                                    style: TextStyle(
+                                      fontSize: isSmallScreen ? screenSize.width * 0.02 : screenSize.width * 0.015,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  Text(
+                                    'Time: ${_formatTimestamp(tx['timestamp'])}',
+                                    style: TextStyle(
+                                      fontSize: isSmallScreen ? screenSize.width * 0.02 : screenSize.width * 0.015,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                     ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Amount: ${tx['amount'].toStringAsFixed(2)} ETH',
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                        Text(
-                          'Hash: ${tx['hash'].substring(0, 8)}...',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontFamily: 'monospace',
-                          ),
-                        ),
-                      ],
-                    ),
-                    trailing: Text(
-                      _formatTimestamp(tx['timestamp']),
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                  ),
-                );
-              },
+                  ],
+                ),
+              ),
             ),
           ),
         ],
@@ -239,17 +277,6 @@ class _BlockchainSimulationState extends BaseSimulationState<BlockchainSimulatio
   }
 
   String _formatTimestamp(DateTime timestamp) {
-    final now = DateTime.now();
-    final difference = now.difference(timestamp);
-
-    if (difference.inMinutes < 1) {
-      return 'Just now';
-    } else if (difference.inHours < 1) {
-      return '${difference.inMinutes}m ago';
-    } else if (difference.inDays < 1) {
-      return '${difference.inHours}h ago';
-    } else {
-      return '${difference.inDays}d ago';
-    }
+    return '${timestamp.hour.toString().padLeft(2, '0')}:${timestamp.minute.toString().padLeft(2, '0')}';
   }
 } 

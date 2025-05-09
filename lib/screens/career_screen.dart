@@ -53,125 +53,33 @@ class _CareerScreenState extends State<CareerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Career Profiles'),
+        title: const Text('Careers'),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Add Career Profile'),
-                  content: SingleChildScrollView(
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          CustomTextField(
-                            controller: _titleController,
-                            labelText: 'Title',
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter a title';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 12),
-                          CustomTextField(
-                            controller: _descriptionController,
-                            labelText: 'Description',
-                            maxLines: 2,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter a description';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 12),
-                          CustomTextField(
-                            controller: _skillsController,
-                            labelText: 'Skills (comma-separated)',
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter required skills';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 12),
-                          CustomTextField(
-                            controller: _educationController,
-                            labelText: 'Education',
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter education requirements';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 12),
-                          CustomTextField(
-                            controller: _salaryRangeController,
-                            labelText: 'Salary Range',
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter salary range';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 12),
-                          CustomTextField(
-                            controller: _jobOutlookController,
-                            labelText: 'Job Outlook',
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter job outlook';
-                              }
-                              return null;
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel'),
-                    ),
-                    CustomButton(
-                      text: 'Add',
-                      isLoading: _isSubmitting,
-                      onPressed: _submitForm,
-                    ),
-                  ],
-                ),
-              );
-            },
+            onPressed: () => _showAddCareerDialog(context),
           ),
         ],
       ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(12.0),
+            padding: const EdgeInsets.all(16.0),
             child: TextField(
-              controller: _searchController,
               decoration: InputDecoration(
                 hintText: 'Search careers...',
-                prefixIcon: const Icon(Icons.search, size: 20),
+                prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                contentPadding: const EdgeInsets.symmetric(vertical: 8.0),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
               ),
               onChanged: (value) {
                 setState(() {
-                  _searchQuery = value.toLowerCase();
+                  _searchQuery = value;
                 });
               },
             ),
@@ -200,93 +108,89 @@ class _CareerScreenState extends State<CareerScreen> {
                   );
                 }
 
-                final careers = snapshot.data ?? [];
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(
+                    child: Text('No careers available'),
+                  );
+                }
+
+                final careers = snapshot.data!;
                 final filteredCareers = careers.where((career) {
-                  return career.title.toLowerCase().contains(_searchQuery) ||
-                      career.description.toLowerCase().contains(_searchQuery);
+                  final searchLower = _searchQuery.toLowerCase();
+                  return career.title.toLowerCase().contains(searchLower) ||
+                      career.description.toLowerCase().contains(searchLower);
                 }).toList();
 
                 if (filteredCareers.isEmpty) {
                   return const Center(
-                    child: Text('No careers found'),
+                    child: Text('No matching careers found'),
                   );
                 }
 
                 return ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                  padding: const EdgeInsets.all(8),
                   itemCount: filteredCareers.length,
                   itemBuilder: (context, index) {
                     final career = filteredCareers[index];
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: Colors.grey.withOpacity(0.2),
-                          width: 1,
-                        ),
-                      ),
+                    return Card(
+                      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
                       child: InkWell(
-                        onTap: () {
-                          Navigator.pushNamed(
-                            context,
-                            '/career-details',
-                            arguments: career,
-                          );
-                        },
-                        borderRadius: BorderRadius.circular(6),
+                        onTap: () => Navigator.pushNamed(
+                          context,
+                          '/career-details',
+                          arguments: career,
+                        ),
                         child: Padding(
-                          padding: const EdgeInsets.all(6),
+                          padding: const EdgeInsets.all(8),
                           child: Row(
                             children: [
-                              Container(
-                                width: 32,
-                                height: 32,
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context).primaryColor.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: Center(
-                                  child: Icon(
-                                    _getCareerIcon(career.title),
-                                    size: 16,
-                                    color: Theme.of(context).primaryColor,
-                                  ),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.network(
+                                  career.imagePath ?? 'https://via.placeholder.com/80',
+                                  width: 80,
+                                  height: 80,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      width: 80,
+                                      height: 80,
+                                      color: Colors.grey[200],
+                                      child: Icon(
+                                        Icons.work,
+                                        size: 32,
+                                        color: Colors.grey[400],
+                                      ),
+                                    );
+                                  },
                                 ),
                               ),
-                              const SizedBox(width: 8),
+                              const SizedBox(width: 12),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
                                       career.title,
                                       style: const TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
-                                    const SizedBox(height: 1),
+                                    const SizedBox(height: 4),
                                     Text(
                                       career.description,
                                       style: TextStyle(
-                                        fontSize: 11,
+                                        fontSize: 12,
                                         color: Colors.grey[600],
                                       ),
-                                      maxLines: 1,
+                                      maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ],
                                 ),
-                              ),
-                              Icon(
-                                Icons.chevron_right,
-                                size: 16,
-                                color: Colors.grey[400],
                               ),
                             ],
                           ),
@@ -380,5 +284,101 @@ class _CareerScreenState extends State<CareerScreen> {
         });
       }
     }
+  }
+
+  void _showAddCareerDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Add Career Profile'),
+        content: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CustomTextField(
+                  controller: _titleController,
+                  labelText: 'Title',
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a title';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 12),
+                CustomTextField(
+                  controller: _descriptionController,
+                  labelText: 'Description',
+                  maxLines: 2,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a description';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 12),
+                CustomTextField(
+                  controller: _skillsController,
+                  labelText: 'Skills (comma-separated)',
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter required skills';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 12),
+                CustomTextField(
+                  controller: _educationController,
+                  labelText: 'Education',
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter education requirements';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 12),
+                CustomTextField(
+                  controller: _salaryRangeController,
+                  labelText: 'Salary Range',
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter salary range';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 12),
+                CustomTextField(
+                  controller: _jobOutlookController,
+                  labelText: 'Job Outlook',
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter job outlook';
+                    }
+                    return null;
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          CustomButton(
+            text: 'Add',
+            isLoading: _isSubmitting,
+            onPressed: _submitForm,
+          ),
+        ],
+      ),
+    );
   }
 }

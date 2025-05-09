@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/quiz_service.dart';
 import '../models/quiz_question.dart';
+import '../models/quiz_option.dart';
 import '../models/quiz_result.dart';
 import '../models/career.dart';
 import '../../widgets/custom_button.dart';
@@ -26,9 +27,9 @@ class _QuizScreenState extends State<QuizScreen> {
     _futureQuestions = _quizService.fetchQuestions();
   }
 
-  void _selectAnswer(String answer) {
+  void _selectAnswer(QuizOption option) {
     setState(() {
-      _answers[_questions[_currentQuestionIndex].id] = answer;
+      _answers[_questions[_currentQuestionIndex].id] = option.text;
 
       if (_currentQuestionIndex < _questions.length - 1) {
         _currentQuestionIndex++;
@@ -36,6 +37,24 @@ class _QuizScreenState extends State<QuizScreen> {
         _submitQuiz();
       }
     });
+  }
+
+  void _previousQuestion() {
+    if (_currentQuestionIndex > 0) {
+      setState(() {
+        _currentQuestionIndex--;
+      });
+    }
+  }
+
+  void _nextQuestion() {
+    if (_currentQuestionIndex < _questions.length - 1) {
+      setState(() {
+        _currentQuestionIndex++;
+      });
+    } else {
+      _submitQuiz();
+    }
   }
 
   Future<void> _submitQuiz() async {
@@ -72,93 +91,197 @@ class _QuizScreenState extends State<QuizScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 600;
+    
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Career Quiz'),
+        title: Text(
+          'Career Quiz',
+          style: TextStyle(
+            fontSize: isSmallScreen ? screenSize.width * 0.05 : screenSize.width * 0.035,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
-      body: FutureBuilder<List<QuizQuestion>>(
-        future: _futureQuestions,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No questions available.'));
-          }
+      body: Column(
+        children: [
+          // Progress Bar
+          Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: screenSize.width * 0.04,
+              vertical: screenSize.height * 0.02,
+            ),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Question ${_currentQuestionIndex + 1} of ${_questions.length}',
+                      style: TextStyle(
+                        fontSize: isSmallScreen ? screenSize.width * 0.035 : screenSize.width * 0.025,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      '${((_currentQuestionIndex + 1) / _questions.length * 100).toInt()}%',
+                      style: TextStyle(
+                        fontSize: isSmallScreen ? screenSize.width * 0.035 : screenSize.width * 0.025,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: screenSize.height * 0.01),
+                LinearProgressIndicator(
+                  value: (_currentQuestionIndex + 1) / _questions.length,
+                  minHeight: screenSize.height * 0.01,
+                ),
+              ],
+            ),
+          ),
 
-          _questions = snapshot.data!;
-          final currentQuestion = _questions[_currentQuestionIndex];
-
-          return _isSubmitting
-              ? const Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CircularProgressIndicator(),
-                      SizedBox(height: 16),
-                      Text('Analyzing your responses...'),
-                    ],
-                  ),
-                )
-              : SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        LinearProgressIndicator(
-                          value: (_currentQuestionIndex + 1) / _questions.length,
-                          backgroundColor: Theme.of(context)
-                              .colorScheme
-                              .primary
-                              .withOpacity(0.1),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          'Question ${_currentQuestionIndex + 1}/${_questions.length}',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.grey[600],
-                                fontSize: 12,
-                              ),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          currentQuestion.question,
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
-                              ?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                        ),
-                        const SizedBox(height: 16),
-                        Expanded(
-                          child: GridView.builder(
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              childAspectRatio: 2.5,
-                              crossAxisSpacing: 8,
-                              mainAxisSpacing: 8,
-                            ),
-                            itemCount: currentQuestion.options.length,
-                            itemBuilder: (context, index) {
-                              final option = currentQuestion.options[index];
-                              return CustomButton(
-                                text: option.text,
-                                isOutlined: true,
-                                onPressed: () => _selectAnswer(option.text),
-                                textColor: Theme.of(context).colorScheme.primary,
-                              );
-                            },
-                          ),
-                        ),
-                      ],
+          // Question
+          Expanded(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.all(screenSize.width * 0.04),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _questions[_currentQuestionIndex].question,
+                    style: TextStyle(
+                      fontSize: isSmallScreen ? screenSize.width * 0.045 : screenSize.width * 0.035,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                );
-        },
+                  SizedBox(height: screenSize.height * 0.02),
+                  ..._questions[_currentQuestionIndex].options.map((option) {
+                    return Padding(
+                      padding: EdgeInsets.only(bottom: screenSize.height * 0.01),
+                      child: _buildOptionButton(
+                        context,
+                        option,
+                        screenSize,
+                        isSmallScreen,
+                      ),
+                    );
+                  }).toList(),
+                ],
+              ),
+            ),
+          ),
+
+          // Navigation Buttons
+          Container(
+            padding: EdgeInsets.all(screenSize.width * 0.04),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if (_currentQuestionIndex > 0)
+                  OutlinedButton(
+                    onPressed: _previousQuestion,
+                    style: OutlinedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: screenSize.width * 0.04,
+                        vertical: screenSize.height * 0.015,
+                      ),
+                    ),
+                    child: Text(
+                      'Previous',
+                      style: TextStyle(
+                        fontSize: isSmallScreen ? screenSize.width * 0.035 : screenSize.width * 0.025,
+                      ),
+                    ),
+                  )
+                else
+                  const SizedBox.shrink(),
+                ElevatedButton(
+                  onPressed: _nextQuestion,
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: screenSize.width * 0.04,
+                      vertical: screenSize.height * 0.015,
+                    ),
+                  ),
+                  child: Text(
+                    _currentQuestionIndex == _questions.length - 1 ? 'Finish' : 'Next',
+                    style: TextStyle(
+                      fontSize: isSmallScreen ? screenSize.width * 0.035 : screenSize.width * 0.025,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOptionButton(
+    BuildContext context,
+    QuizOption option,
+    Size screenSize,
+    bool isSmallScreen,
+  ) {
+    final isSelected = _answers[_questions[_currentQuestionIndex].id] == option.text;
+    
+    return InkWell(
+      onTap: () => _selectAnswer(option),
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(screenSize.width * 0.04),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? Theme.of(context).primaryColor.withOpacity(0.1)
+              : Colors.grey[100],
+          borderRadius: BorderRadius.circular(screenSize.width * 0.02),
+          border: Border.all(
+            color: isSelected
+                ? Theme.of(context).primaryColor
+                : Colors.grey[300]!,
+            width: screenSize.width * 0.002,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: screenSize.width * 0.05,
+              height: screenSize.width * 0.05,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected
+                      ? Theme.of(context).primaryColor
+                      : Colors.grey[400]!,
+                  width: screenSize.width * 0.002,
+                ),
+              ),
+              child: isSelected
+                  ? Icon(
+                      Icons.check,
+                      size: screenSize.width * 0.04,
+                      color: Theme.of(context).primaryColor,
+                    )
+                  : null,
+            ),
+            SizedBox(width: screenSize.width * 0.04),
+            Expanded(
+              child: Text(
+                option.text,
+                style: TextStyle(
+                  fontSize: isSmallScreen ? screenSize.width * 0.035 : screenSize.width * 0.025,
+                  color: isSelected
+                      ? Theme.of(context).primaryColor
+                      : Colors.black87,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -327,3 +450,4 @@ class QuizResultScreen extends StatelessWidget {
     }
   }
 }
+

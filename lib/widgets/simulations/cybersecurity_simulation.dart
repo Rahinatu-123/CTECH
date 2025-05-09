@@ -89,84 +89,187 @@ class _CybersecuritySimulationState extends BaseSimulationState<CybersecuritySim
   }
 
   @override
+  String getInstructions() {
+    return 'Practice identifying and fixing security vulnerabilities in code. Learn about common security threats and how to protect against them.';
+  }
+
+  @override
   Widget buildSimulationContent() {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const Text(
             'Password Strength Analyzer',
             style: TextStyle(
-              fontSize: 24,
+              fontSize: 12,
               fontWeight: FontWeight.bold,
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 32),
-          TextField(
-            controller: _passwordController,
-            decoration: InputDecoration(
-              labelText: 'Enter Password',
-              border: const OutlineInputBorder(),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                  color: Colors.grey,
-                ),
-                onPressed: () {
-                  setState(() {
-                    _obscurePassword = !_obscurePassword;
-                  });
-                },
+          const SizedBox(height: 8),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Enter Password',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  TextField(
+                    controller: _passwordController,
+                    obscureText: _obscurePassword,
+                    decoration: InputDecoration(
+                      border: const OutlineInputBorder(),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                          size: 16,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                    ),
+                    style: const TextStyle(fontSize: 9),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Strength',
+                              style: TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              _strength,
+                              style: TextStyle(
+                                fontSize: 9,
+                                color: _strengthColor,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Entropy',
+                              style: TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              _entropy.toStringAsFixed(1),
+                              style: const TextStyle(
+                                fontSize: 9,
+                                color: Colors.blue,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Crack Time',
+                              style: TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              _crackTime,
+                              style: const TextStyle(
+                                fontSize: 9,
+                                color: Colors.orange,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  LinearProgressIndicator(
+                    value: _entropy / 100,
+                    backgroundColor: Colors.grey[200],
+                    valueColor: AlwaysStoppedAnimation<Color>(_strengthColor),
+                    minHeight: 4,
+                  ),
+                ],
               ),
-            ),
-            obscureText: _obscurePassword,
-          ),
-          const SizedBox(height: 24),
-          if (_strength.isNotEmpty) ...[
-            Text(
-              'Strength: $_strength',
-              style: TextStyle(
-                fontSize: 20,
-                color: _strengthColor,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            LinearProgressIndicator(
-              value: _entropy / 100,
-              backgroundColor: Colors.grey[200],
-              valueColor: AlwaysStoppedAnimation<Color>(_strengthColor),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Entropy: ${_entropy.toStringAsFixed(1)} bits',
-              style: const TextStyle(fontSize: 16),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Estimated crack time: $_crackTime',
-              style: const TextStyle(fontSize: 16),
-              textAlign: TextAlign.center,
-            ),
-          ],
-          const SizedBox(height: 32),
-          const Text(
-            'Password Requirements:',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 8),
-          _buildRequirement('At least 8 characters long', _passwordController.text.length >= 8),
-          _buildRequirement('Contains uppercase letters', _passwordController.text.contains(RegExp(r'[A-Z]'))),
-          _buildRequirement('Contains lowercase letters', _passwordController.text.contains(RegExp(r'[a-z]'))),
-          _buildRequirement('Contains numbers', _passwordController.text.contains(RegExp(r'[0-9]'))),
-          _buildRequirement('Contains special characters', _passwordController.text.contains(RegExp(r'[^a-zA-Z0-9]'))),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Password Requirements',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  _buildRequirement(
+                    'At least 8 characters',
+                    _passwordController.text.length >= 8,
+                  ),
+                  _buildRequirement(
+                    'Contains uppercase letter',
+                    _passwordController.text.contains(RegExp(r'[A-Z]')),
+                  ),
+                  _buildRequirement(
+                    'Contains lowercase letter',
+                    _passwordController.text.contains(RegExp(r'[a-z]')),
+                  ),
+                  _buildRequirement(
+                    'Contains number',
+                    _passwordController.text.contains(RegExp(r'[0-9]')),
+                  ),
+                  _buildRequirement(
+                    'Contains special character',
+                    _passwordController.text.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]')),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -174,20 +277,20 @@ class _CybersecuritySimulationState extends BaseSimulationState<CybersecuritySim
 
   Widget _buildRequirement(String text, bool isMet) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         children: [
           Icon(
-            isMet ? Icons.check_circle : Icons.circle_outlined,
+            isMet ? Icons.check_circle : Icons.circle,
+            size: 12,
             color: isMet ? Colors.green : Colors.grey,
-            size: 20,
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 4),
           Text(
             text,
             style: TextStyle(
+              fontSize: 8,
               color: isMet ? Colors.green : Colors.grey,
-              fontSize: 16,
             ),
           ),
         ],

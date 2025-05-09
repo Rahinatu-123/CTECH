@@ -71,22 +71,33 @@ class MyApp extends StatelessWidget {
         theme: themeProvider.theme,
         home: const HomeScreen(),
         onGenerateRoute: (settings) {
-          // Handle notification payloads
-          // if (settings.name?.startsWith('/') == true) { // Optionally comment this block if strictly notification related
           if (settings.name?.startsWith('/') == true) {
             switch (settings.name) {
               case '/quiz':
-                return MaterialPageRoute(builder: (_) => const QuizScreen());
+                return MaterialPageRoute(
+                  builder: (_) => const QuizScreen(),
+                  settings: settings,
+                );
               case '/careers':
-                return MaterialPageRoute(builder: (_) => const CareerScreen());
+                return MaterialPageRoute(
+                  builder: (_) => const CareerScreen(),
+                  settings: settings,
+                );
               case '/tech-words':
-                return MaterialPageRoute(builder: (_) => const TechWordsScreen());
+                return MaterialPageRoute(
+                  builder: (_) => const TechWordsScreen(),
+                  settings: settings,
+                );
               case '/settings':
-                return MaterialPageRoute(builder: (_) => const SettingsScreen());
+                return MaterialPageRoute(
+                  builder: (_) => const SettingsScreen(),
+                  settings: settings,
+                );
               case '/career-details':
                 final career = settings.arguments as Career;
                 return MaterialPageRoute(
                   builder: (_) => CareerDetailsScreen(career: career),
+                  settings: settings,
                 );
               default:
                 return null;
@@ -99,15 +110,10 @@ class MyApp extends StatelessWidget {
           '/signup': (context) => const SignUpScreen(),
           '/home': (context) => const HomeScreen(),
           '/career': (context) => const CareerScreen(),
-          '/quiz': (context) => const QuizScreen(),
           '/stories': (context) => const StoriesScreen(),
           '/tech-words': (context) => const TechWordsScreen(),
           '/profile': (context) => const ProfileScreen(),
-          '/settings': (context) => const SettingsScreen(),
           '/forgot-password': (context) => const ForgotPasswordScreen(),
-          '/career-details': (context) => CareerDetailsScreen(
-                career: ModalRoute.of(context)!.settings.arguments as Career,
-              ),
           '/verify-otp': (context) => VerifyOtpScreen(
                 email: ModalRoute.of(context)!.settings.arguments as String,
               ),
@@ -125,20 +131,50 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: themeProvider.theme,
       home: const SplashScreen(),
+      onGenerateRoute: (settings) {
+        if (settings.name?.startsWith('/') == true) {
+          switch (settings.name) {
+            case '/quiz':
+              return MaterialPageRoute(
+                builder: (_) => const QuizScreen(),
+                settings: settings,
+              );
+            case '/careers':
+              return MaterialPageRoute(
+                builder: (_) => const CareerScreen(),
+                settings: settings,
+              );
+            case '/tech-words':
+              return MaterialPageRoute(
+                builder: (_) => const TechWordsScreen(),
+                settings: settings,
+              );
+            case '/settings':
+              return MaterialPageRoute(
+                builder: (_) => const SettingsScreen(),
+                settings: settings,
+              );
+            case '/career-details':
+              final career = settings.arguments as Career;
+              return MaterialPageRoute(
+                builder: (_) => CareerDetailsScreen(career: career),
+                settings: settings,
+              );
+            default:
+              return null;
+          }
+        }
+        return null;
+      },
       routes: {
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignUpScreen(),
         '/home': (context) => const HomeScreen(),
-        '/careers': (context) => const CareerScreen(),
-        '/quiz': (context) => const QuizScreen(),
+        '/career': (context) => const CareerScreen(),
         '/stories': (context) => const StoriesScreen(),
         '/tech-words': (context) => const TechWordsScreen(),
         '/profile': (context) => const ProfileScreen(),
-        '/settings': (context) => const SettingsScreen(),
         '/forgot-password': (context) => const ForgotPasswordScreen(),
-        '/career-details': (context) => CareerDetailsScreen(
-              career: ModalRoute.of(context)!.settings.arguments as Career,
-            ),
         '/verify-otp': (context) => VerifyOtpScreen(
               email: ModalRoute.of(context)!.settings.arguments as String,
             ),

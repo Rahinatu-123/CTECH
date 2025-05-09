@@ -152,34 +152,102 @@ class _TechWordsScreenState extends State<TechWordsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 600;
+    
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Tech Words',
-          style: TextStyle(fontSize: 18),
+          style: TextStyle(
+            fontSize: isSmallScreen ? screenSize.width * 0.05 : screenSize.width * 0.035,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
       body: Column(
         children: [
+          // Search Bar
           Padding(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(screenSize.width * 0.02),
             child: TextField(
-              controller: _searchController,
               decoration: InputDecoration(
                 hintText: 'Search tech words...',
-                prefixIcon: const Icon(Icons.search, size: 20),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+                prefixIcon: Icon(
+                  Icons.search,
+                  size: isSmallScreen ? screenSize.width * 0.05 : screenSize.width * 0.035,
                 ),
-                contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(screenSize.width * 0.02),
+                ),
+                contentPadding: EdgeInsets.symmetric(
+                  vertical: screenSize.height * 0.015,
+                  horizontal: screenSize.width * 0.02,
+                ),
+              ),
+              style: TextStyle(
+                fontSize: isSmallScreen ? screenSize.width * 0.035 : screenSize.width * 0.025,
               ),
               onChanged: (value) {
-                setState(() {
-                  _searchQuery = value.toLowerCase();
-                });
+                // Search functionality would go here
               },
             ),
           ),
+
+          // Categories
+          SizedBox(
+            height: screenSize.height * 0.06,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: EdgeInsets.symmetric(horizontal: screenSize.width * 0.02),
+              children: [
+                _buildCategoryChip(
+                  context,
+                  'All',
+                  true,
+                  screenSize,
+                  isSmallScreen,
+                ),
+                _buildCategoryChip(
+                  context,
+                  'Programming',
+                  false,
+                  screenSize,
+                  isSmallScreen,
+                ),
+                _buildCategoryChip(
+                  context,
+                  'Web Development',
+                  false,
+                  screenSize,
+                  isSmallScreen,
+                ),
+                _buildCategoryChip(
+                  context,
+                  'Mobile Development',
+                  false,
+                  screenSize,
+                  isSmallScreen,
+                ),
+                _buildCategoryChip(
+                  context,
+                  'Data Science',
+                  false,
+                  screenSize,
+                  isSmallScreen,
+                ),
+                _buildCategoryChip(
+                  context,
+                  'DevOps',
+                  false,
+                  screenSize,
+                  isSmallScreen,
+                ),
+              ],
+            ),
+          ),
+
+          // Word List
           Expanded(
             child: FutureBuilder<List<TechWord>>(
               future: _futureTechWords,
@@ -221,14 +289,14 @@ class _TechWordsScreenState extends State<TechWordsScreen> {
 
                 return Expanded(
                   child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: EdgeInsets.all(screenSize.width * 0.02),
                     itemCount: filteredWords.length,
                     itemBuilder: (context, index) {
                       final word = filteredWords[index];
                       return Card(
-                        margin: const EdgeInsets.only(bottom: 8),
+                        margin: EdgeInsets.only(bottom: screenSize.height * 0.01),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(screenSize.width * 0.01),
                         ),
                         child: ExpansionTile(
                           leading: CircleAvatar(
@@ -238,22 +306,22 @@ class _TechWordsScreenState extends State<TechWordsScreen> {
                               word.word[0].toUpperCase(),
                               style: TextStyle(
                                 color: Theme.of(context).primaryColor,
-                                fontSize: 14,
+                                fontSize: isSmallScreen ? screenSize.width * 0.035 : screenSize.width * 0.025,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
                           title: Text(
                             word.word,
-                            style: const TextStyle(
-                              fontSize: 14,
+                            style: TextStyle(
+                              fontSize: isSmallScreen ? screenSize.width * 0.035 : screenSize.width * 0.025,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           subtitle: Text(
                             word.category.isEmpty ? 'General' : word.category,
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: isSmallScreen ? screenSize.width * 0.025 : screenSize.width * 0.015,
                               color: Colors.grey[600],
                             ),
                             maxLines: 1,
@@ -261,41 +329,48 @@ class _TechWordsScreenState extends State<TechWordsScreen> {
                           ),
                           children: [
                             Padding(
-                              padding: const EdgeInsets.all(12),
+                              padding: EdgeInsets.all(screenSize.width * 0.02),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     'Meaning:',
                                     style: TextStyle(
-                                      fontSize: 13,
+                                      fontSize: isSmallScreen ? screenSize.width * 0.03 : screenSize.width * 0.02,
                                       fontWeight: FontWeight.bold,
                                       color: Theme.of(context).primaryColor,
                                     ),
                                   ),
-                                  const SizedBox(height: 4),
+                                  SizedBox(height: screenSize.height * 0.005),
                                   Text(
                                     word.meaning,
-                                    style: const TextStyle(
-                                      fontSize: 13,
+                                    style: TextStyle(
+                                      fontSize: isSmallScreen ? screenSize.width * 0.025 : screenSize.width * 0.015,
                                     ),
                                   ),
                                   if (word.example != null) ...[
-                                    const SizedBox(height: 8),
+                                    SizedBox(height: screenSize.height * 0.01),
                                     Text(
                                       'Example:',
                                       style: TextStyle(
-                                        fontSize: 13,
+                                        fontSize: isSmallScreen ? screenSize.width * 0.03 : screenSize.width * 0.02,
                                         fontWeight: FontWeight.bold,
                                         color: Theme.of(context).primaryColor,
                                       ),
                                     ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      word.example!,
-                                      style: const TextStyle(
-                                        fontSize: 13,
-                                        fontStyle: FontStyle.italic,
+                                    SizedBox(height: screenSize.height * 0.005),
+                                    Container(
+                                      padding: EdgeInsets.all(screenSize.width * 0.02),
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey[100],
+                                        borderRadius: BorderRadius.circular(screenSize.width * 0.01),
+                                      ),
+                                      child: Text(
+                                        word.example!,
+                                        style: TextStyle(
+                                          fontSize: isSmallScreen ? screenSize.width * 0.025 : screenSize.width * 0.015,
+                                          fontFamily: 'monospace',
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -316,6 +391,38 @@ class _TechWordsScreenState extends State<TechWordsScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddWordDialog,
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  Widget _buildCategoryChip(
+    BuildContext context,
+    String label,
+    bool isSelected,
+    Size screenSize,
+    bool isSmallScreen,
+  ) {
+    return Padding(
+      padding: EdgeInsets.only(right: screenSize.width * 0.02),
+      child: FilterChip(
+        label: Text(
+          label,
+          style: TextStyle(
+            fontSize: isSmallScreen ? screenSize.width * 0.025 : screenSize.width * 0.015,
+            color: isSelected ? Colors.white : Colors.black,
+          ),
+        ),
+        selected: isSelected,
+        onSelected: (bool selected) {
+          // Handle category selection
+        },
+        backgroundColor: Colors.grey[200],
+        selectedColor: Theme.of(context).primaryColor,
+        checkmarkColor: Colors.white,
+        padding: EdgeInsets.symmetric(
+          horizontal: screenSize.width * 0.02,
+          vertical: screenSize.height * 0.005,
+        ),
       ),
     );
   }

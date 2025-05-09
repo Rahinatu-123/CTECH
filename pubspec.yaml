@@ -42,6 +42,9 @@ dependencies:
   # UI Components
   flutter_spinkit: ^5.2.0
   fluttertoast: ^8.2.12
+  flutter_colorpicker: ^1.0.3
+  flutter_html: ^3.0.0-beta.2
+  webview_flutter: ^4.7.0
 
   # Firebase Core
   firebase_core: ^3.13.0

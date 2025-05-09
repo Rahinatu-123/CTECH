@@ -7,20 +7,30 @@ class CareerService {
 
   Future<List<Career>> fetchCareers() async {
     try {
+      print('Fetching careers from: $baseUrl/career_profiles.php');
       final response = await http.get(Uri.parse('$baseUrl/career_profiles.php'));
+      
+      print('Response status code: ${response.statusCode}');
+      print('Response body: ${response.body}');
       
       if (response.statusCode == 200) {
         try {
           final decoded = jsonDecode(response.body);
+          print('Decoded response: $decoded');
+          
           if (decoded is List) {
-            return decoded.map((json) => Career.fromJson(json)).toList();
+            final careers = decoded.map((json) => Career.fromJson(json)).toList();
+            print('Parsed ${careers.length} careers');
+            return careers;
           } else if (decoded is Map<String, dynamic> && decoded.containsKey('data')) {
-            // Handle case where API returns { "data": [...] }
             final data = decoded['data'];
             if (data is List) {
-              return data.map((json) => Career.fromJson(json)).toList();
+              final careers = data.map((json) => Career.fromJson(json)).toList();
+              print('Parsed ${careers.length} careers from data field');
+              return careers;
             }
           }
+          print('Unexpected data format: ${response.body}');
           throw Exception('Unexpected data format: ${response.body}');
         } catch (e) {
           print('JSON parsing error: $e');

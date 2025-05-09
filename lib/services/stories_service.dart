@@ -24,4 +24,16 @@ class StoriesService {
       throw Exception('Failed to load stories: ${response.statusCode}');
     }
   }
+
+  Future<void> addStory(Story story) async {
+    final response = await http.post(
+      Uri.parse(apiUrl),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(story.toJson()),
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw Exception('Failed to add story: ${response.statusCode}');
+    }
+  }
 } 

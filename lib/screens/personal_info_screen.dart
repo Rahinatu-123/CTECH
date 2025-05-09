@@ -1,17 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import '../widgets/custom_text_field.dart';
+import '../widgets/custom_button.dart';
 import '../services/auth.dart';
 
 class PersonalInfoScreen extends StatefulWidget {
-  final String email;
-  final String password;
-
-  const PersonalInfoScreen({
-    super.key,
-    required this.email,
-    required this.password,
-  });
+  const PersonalInfoScreen({super.key});
 
   @override
   State<PersonalInfoScreen> createState() => _PersonalInfoScreenState();
@@ -22,61 +16,63 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _phoneController = TextEditingController();
+  final _locationController = TextEditingController();
+  final _bioController = TextEditingController();
   bool _isLoading = false;
-  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
 
   @override
   void dispose() {
     _firstNameController.dispose();
     _lastNameController.dispose();
     _phoneController.dispose();
+    _locationController.dispose();
+    _bioController.dispose();
     super.dispose();
   }
 
-  Future<void> _submitPersonalInfo() async {
-    if (_formKey.currentState!.validate()) {
+  Future<void> _loadUserData() async {
+    final user = context.read<AuthService>().currentUser;
+    if (user != null) {
+      final names = user.displayName?.split(' ') ?? ['', ''];
       setState(() {
-        _isLoading = true;
-        _errorMessage = null;
+        _firstNameController.text = names[0];
+        _lastNameController.text = names.length > 1 ? names[1] : '';
+        // Load other user data if available
       });
+    }
+  }
 
+  Future<void> _savePersonalInfo() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      setState(() => _isLoading = true);
       try {
-        final authService = Provider.of<AuthService>(context, listen: false);
+        final firstName = _firstNameController.text.trim();
+        final lastName = _lastNameController.text.trim();
+        final displayName = [firstName, lastName].where((s) => s.isNotEmpty).join(' ');
         
-        // Update the user's profile with additional information
-        await authService.updateProfile(
-          displayName: '${_firstNameController.text} ${_lastNameController.text}',
+        await context.read<AuthService>().updateProfile(
+          displayName: displayName,
         );
-
-        // TODO: Store additional user information in Firestore
-        // You might want to create a users collection to store the phone number
-        // and other user details
-
+        
         if (!mounted) return;
-
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          '/home',
-          (route) => false,
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Personal information updated successfully')),
         );
-      } catch (e) {
-        if (mounted) {
-          setState(() {
-            _errorMessage = e.toString();
-          });
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(_errorMessage!),
-              backgroundColor: Colors.red,
-              duration: const Duration(seconds: 3),
-            ),
-          );
-        }
+        Navigator.pop(context);
+      } catch (error) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error.toString())),
+        );
       } finally {
         if (mounted) {
-          setState(() {
-            _isLoading = false;
-          });
+          setState(() => _isLoading = false);
         }
       }
     }
@@ -84,166 +80,180 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const darkBlue = Color(0xFF0A2A36);
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 600;
+    
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Header
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.only(left: 24, top: 36, bottom: 36, right: 24),
-              decoration: const BoxDecoration(
-                color: darkBlue,
-                borderRadius: BorderRadius.only(
-                  bottomRight: Radius.circular(48),
-                ),
-              ),
-              child: const Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Personal Information',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 2,
-                  ),
-                ),
-              ),
-            ),
-            // Form Card
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24.0),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 16,
-                        offset: const Offset(0, 8),
+      appBar: AppBar(
+        title: Text(
+          'Personal Information',
+          style: TextStyle(
+            fontSize: isSmallScreen ? screenSize.width * 0.05 : screenSize.width * 0.035,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.all(screenSize.width * 0.04),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Profile Picture Section
+                Center(
+                  child: Column(
+                    children: [
+                      CircleAvatar(
+                        radius: screenSize.width * 0.1,
+                        backgroundImage: context.read<AuthService>().currentUser?.photoURL != null
+                            ? NetworkImage(context.read<AuthService>().currentUser!.photoURL!)
+                            : null,
+                        child: context.read<AuthService>().currentUser?.photoURL == null
+                            ? Icon(
+                                Icons.person,
+                                size: screenSize.width * 0.1,
+                                color: Colors.grey[400],
+                              )
+                            : null,
+                      ),
+                      SizedBox(height: screenSize.height * 0.01),
+                      TextButton.icon(
+                        onPressed: () {
+                          // Handle profile picture change
+                        },
+                        icon: const Icon(Icons.camera_alt),
+                        label: const Text('Change Profile Picture'),
                       ),
                     ],
                   ),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // First Name Field
-                        TextFormField(
-                          controller: _firstNameController,
-                          decoration: InputDecoration(
-                            labelText: 'First Name',
-                            prefixIcon: const Icon(Icons.person),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your first name';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        // Last Name Field
-                        TextFormField(
-                          controller: _lastNameController,
-                          decoration: InputDecoration(
-                            labelText: 'Last Name',
-                            prefixIcon: const Icon(Icons.person),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your last name';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        // Phone Field
-                        TextFormField(
-                          controller: _phoneController,
-                          keyboardType: TextInputType.phone,
-                          decoration: InputDecoration(
-                            labelText: 'Phone Number',
-                            prefixIcon: const Icon(Icons.phone),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your phone number';
-                            }
-                            if (!RegExp(r'^\+?[\d\s-]+$').hasMatch(value)) {
-                              return 'Please enter a valid phone number';
-                            }
-                            return null;
-                          },
-                        ),
-                        if (_errorMessage != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 16.0),
-                            child: Text(
-                              _errorMessage!,
-                              style: const TextStyle(
-                                color: Colors.red,
-                                fontSize: 12,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        const SizedBox(height: 32),
-                        // Complete Registration Button
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: _isLoading ? null : _submitPersonalInfo,
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              backgroundColor: darkBlue,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                            ),
-                            child: _isLoading
-                                ? const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                : const Text(
-                                    'Complete Registration',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                          ),
-                        ),
-                      ],
-                    ),
+                ),
+                SizedBox(height: screenSize.height * 0.02),
+
+                // Personal Information Form
+                Text(
+                  'Basic Information',
+                  style: TextStyle(
+                    fontSize: isSmallScreen ? screenSize.width * 0.04 : screenSize.width * 0.03,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
+                SizedBox(height: screenSize.height * 0.01),
+                
+                // Name Fields
+                Row(
+                  children: [
+                    Expanded(
+                      child: CustomTextField(
+                        controller: _firstNameController,
+                        labelText: 'First Name',
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your first name';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    SizedBox(width: screenSize.width * 0.02),
+                    Expanded(
+                      child: CustomTextField(
+                        controller: _lastNameController,
+                        labelText: 'Last Name',
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your last name';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: screenSize.height * 0.02),
+
+                // Contact Information
+                Text(
+                  'Contact Information',
+                  style: TextStyle(
+                    fontSize: isSmallScreen ? screenSize.width * 0.04 : screenSize.width * 0.03,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: screenSize.height * 0.01),
+                
+                CustomTextField(
+                  controller: _phoneController,
+                  labelText: 'Phone Number',
+                  keyboardType: TextInputType.phone,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your phone number';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: screenSize.height * 0.02),
+
+                // Location
+                Text(
+                  'Location',
+                  style: TextStyle(
+                    fontSize: isSmallScreen ? screenSize.width * 0.04 : screenSize.width * 0.03,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: screenSize.height * 0.01),
+                
+                CustomTextField(
+                  controller: _locationController,
+                  labelText: 'City, Country',
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your location';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: screenSize.height * 0.02),
+
+                // Bio
+                Text(
+                  'About Me',
+                  style: TextStyle(
+                    fontSize: isSmallScreen ? screenSize.width * 0.04 : screenSize.width * 0.03,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: screenSize.height * 0.01),
+                
+                CustomTextField(
+                  controller: _bioController,
+                  labelText: 'Bio',
+                  maxLines: 3,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your bio';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: screenSize.height * 0.03),
+
+                // Save Button
+                Center(
+                  child: CustomButton(
+                    onPressed: _isLoading ? () {} : () {
+                      _savePersonalInfo();
+                    },
+                    text: _isLoading ? 'Saving...' : 'Save Changes',
+                    width: screenSize.width * 0.8,
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

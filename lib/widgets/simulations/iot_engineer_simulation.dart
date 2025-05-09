@@ -76,86 +76,96 @@ class _IoTEngineerSimulationState extends BaseSimulationState<IoTEngineerSimulat
   }
 
   @override
+  String getInstructions() {
+    return 'Connect and program virtual IoT devices. Learn about sensors, actuators, and how to build connected systems.';
+  }
+
+  @override
   Widget buildSimulationContent() {
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 600;
+    
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(screenSize.width * 0.01),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  Text(
-                    'IoT Sensor Data Logger',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ElevatedButton.icon(
-                        onPressed: _toggleRecording,
-                        icon: Icon(_isRecording ? Icons.stop : Icons.play_arrow),
-                        label: Text(_isRecording ? 'Stop Recording' : 'Start Recording'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: _isRecording ? Colors.red : Colors.green,
-                        ),
-                      ),
-                      ElevatedButton.icon(
-                        onPressed: _clearData,
-                        icon: const Icon(Icons.clear),
-                        label: const Text('Clear Data'),
-                      ),
-                    ],
-                  ),
-                  if (_isRecording) ...[
-                    const SizedBox(height: 16),
-                    Text(
-                      'Recording Time: ${_getDuration()}',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
+          Text(
+            'IoT Sensor Simulator',
+            style: TextStyle(
+              fontSize: isSmallScreen ? screenSize.width * 0.035 : screenSize.width * 0.025,
+              fontWeight: FontWeight.bold,
             ),
+            textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: screenSize.height * 0.01),
           Expanded(
             child: Card(
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: EdgeInsets.all(screenSize.width * 0.01),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Sensor Data Log',
-                      style: Theme.of(context).textTheme.titleMedium,
+                      'Sensor Data',
+                      style: TextStyle(
+                        fontSize: isSmallScreen ? screenSize.width * 0.03 : screenSize.width * 0.02,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: screenSize.height * 0.005),
                     Expanded(
-                      child: _sensorData.isEmpty
-                          ? const Center(
-                              child: Text('No data recorded yet'),
-                            )
-                          : ListView.builder(
-                              itemCount: _sensorData.length,
-                              itemBuilder: (context, index) {
-                                final data = _sensorData[index];
-                                return ListTile(
-                                  title: Text(
-                                    '${data['type']} (${data['timestamp'].split('T')[1].split('.')[0]})',
+                      child: ListView.builder(
+                        itemCount: _sensorData.length,
+                        itemBuilder: (context, index) {
+                          final data = _sensorData[index];
+                          return Card(
+                            margin: EdgeInsets.only(bottom: screenSize.height * 0.005),
+                            child: Padding(
+                              padding: EdgeInsets.all(screenSize.width * 0.01),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        _getSensorIcon(data['type']),
+                                        size: isSmallScreen ? screenSize.width * 0.04 : screenSize.width * 0.03,
+                                        color: _getSensorColor(data['type']),
+                                      ),
+                                      SizedBox(width: screenSize.width * 0.01),
+                                      Expanded(
+                                        child: Text(
+                                          data['type'],
+                                          style: TextStyle(
+                                            fontSize: isSmallScreen ? screenSize.width * 0.025 : screenSize.width * 0.015,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                      Text(
+                                        '${data['x']} ${_getSensorUnit(data['type'])}',
+                                        style: TextStyle(
+                                          fontSize: isSmallScreen ? screenSize.width * 0.025 : screenSize.width * 0.015,
+                                          color: _getSensorColor(data['type']),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  subtitle: Text(
-                                    'X: ${data['x']}, Y: ${data['y']}, Z: ${data['z']}',
+                                  SizedBox(height: screenSize.height * 0.002),
+                                  Text(
+                                    'Time: ${_formatTimestamp(data['timestamp'])}',
+                                    style: TextStyle(
+                                      fontSize: isSmallScreen ? screenSize.width * 0.02 : screenSize.width * 0.015,
+                                      color: Colors.grey,
+                                    ),
                                   ),
-                                );
-                              },
+                                ],
+                              ),
                             ),
+                          );
+                        },
+                      ),
                     ),
                   ],
                 ),
@@ -165,5 +175,40 @@ class _IoTEngineerSimulationState extends BaseSimulationState<IoTEngineerSimulat
         ],
       ),
     );
+  }
+
+  String _formatTimestamp(String timestamp) {
+    final dateTime = DateTime.parse(timestamp);
+    return '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}:${dateTime.second.toString().padLeft(2, '0')}';
+  }
+
+  IconData _getSensorIcon(String type) {
+    if (type == 'accelerometer') {
+      return Icons.speed;
+    } else if (type == 'gyroscope') {
+      return Icons.rotate_right;
+    } else {
+      throw Exception('Unknown sensor type');
+    }
+  }
+
+  Color _getSensorColor(String type) {
+    if (type == 'accelerometer') {
+      return Colors.blue;
+    } else if (type == 'gyroscope') {
+      return Colors.green;
+    } else {
+      throw Exception('Unknown sensor type');
+    }
+  }
+
+  String _getSensorUnit(String type) {
+    if (type == 'accelerometer') {
+      return 'm/s²';
+    } else if (type == 'gyroscope') {
+      return '°/s';
+    } else {
+      throw Exception('Unknown sensor type');
+    }
   }
 } 
