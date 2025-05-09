@@ -92,6 +92,15 @@ class Career {
         return 'web_dev';
       }
       
+      // Game Development
+      if (lowercaseTitle.contains('game') || 
+          lowercaseTitle.contains('gaming') ||
+          lowercaseTitle.contains('game developer') ||
+          lowercaseTitle.contains('game designer') ||
+          lowercaseTitle.contains('game programmer')) {
+        return 'game_dev';
+      }
+      
       // IoT and Embedded Systems
       if (lowercaseTitle.contains('iot') || 
           lowercaseTitle.contains('embedded') ||
